@@ -32,9 +32,7 @@ inputs:
     description: 'Parameter to use for overriding nx head commit'
     required: false
   isWorkflowsCiPipeline:
-    description:
-      'DO NOT USE: Flag to indicate if `.github/workflows/ci.yml` is being
-      executed '
+    description: 'DO NOT USE: Flag to indicate if `.github/workflows/ci.yml` is being executed '
     required: false
   parallel:
     description: 'Number of tasks to execute in parallel (can be expensive)'
