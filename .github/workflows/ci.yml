@@ -61,7 +61,3 @@ jobs:
           argsNx: '--foo=bar'
           projects: app1
           isWorkflowsCiPipeline: true
-
-      - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
