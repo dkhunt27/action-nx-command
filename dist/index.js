@@ -27300,6 +27300,8 @@ function parseInputs() {
     const workingDirectory = coreExports.getInput('workingDirectory');
     const baseBoundaryOverride = coreExports.getInput('baseBoundaryOverride');
     const headBoundaryOverride = coreExports.getInput('headBoundaryOverride');
+    // this is an internal flag used to skip running the actual nx command for testing purposes
+    const isWorkflowsCiPipeline = coreExports.getInput('isWorkflowsCiPipeline') === 'true';
     return {
         affected,
         all,
@@ -27307,6 +27309,7 @@ function parseInputs() {
         argsNx,
         baseBoundaryOverride,
         headBoundaryOverride,
+        isWorkflowsCiPipeline,
         parallel,
         projects,
         setNxBranchToPrNumber,
@@ -31323,27 +31326,27 @@ async function retrieveGitBoundaries(inputs) {
 async function nx(args) {
     await execExports.exec(`npx nx ${args.join(' ')}`);
 }
-async function runNxAll(inputs, nxArgs) {
+async function runNxAll(inputs, argsNx) {
     return inputs.targets.reduce((lastPromise, target) => lastPromise.then(() => nx([
         'run-many',
         `--target=${target}`,
         '--all',
-        ...nxArgs,
+        ...argsNx,
         '--',
-        ...inputs.addtlArgs
+        ...inputs.argsAddtl
     ])), Promise.resolve());
 }
-async function runNxProjects(inputs, nxArgs) {
+async function runNxProjects(inputs, argsNx) {
     return inputs.targets.reduce((lastPromise, target) => lastPromise.then(() => nx([
         'run-many',
         `--target=${target}`,
         `--projects=${inputs.projects.join(',')}`,
-        ...nxArgs,
+        ...argsNx,
         '--',
-        ...inputs.addtlArgs
+        ...inputs.argsAddtl
     ])), Promise.resolve());
 }
-async function runNxAffected(inputs, nxArgs) {
+async function runNxAffected(inputs, argsNx) {
     const [base, head] = await coreExports.group('🏷 Retrieving Git boundaries (affected command)', () => retrieveGitBoundaries(inputs).then(([base, head]) => {
         coreExports.info(`Base boundary: ${base}`);
         coreExports.info(`Head boundary: ${head}`);
@@ -31354,16 +31357,15 @@ async function runNxAffected(inputs, nxArgs) {
         `--target=${target}`,
         `--base=${base}`,
         `--head=${head}`,
-        ...nxArgs,
+        ...argsNx,
         '--',
-        ...inputs.addtlArgs
+        ...inputs.argsAddtl
     ])), Promise.resolve());
 }
 async function runNx(inputs) {
-    const addtlArgs = inputs.addtlArgs;
-    const nxArgs = inputs.nxArgs;
-    coreExports.info(`nxArgs: ${nxArgs.join()}`);
-    coreExports.info(`addtlArgs: ${addtlArgs.join()}`);
+    const argsNx = inputs.argsNx;
+    coreExports.info(`argsNx: ${argsNx.join()}`);
+    coreExports.info(`argsAddtl: ${inputs.argsAddtl.join()}`);
     if (inputs.setNxBranchToPrNumber) {
         if (githubExports.context.eventName === 'pull_request') {
             const prPayload = githubExports.context.payload.pull_request;
@@ -31371,16 +31373,16 @@ async function runNx(inputs) {
         }
     }
     if (inputs.parallel) {
-        nxArgs.push(`--parallel=${inputs.parallel.toString()}`);
+        argsNx.push(`--parallel=${inputs.parallel.toString()}`);
     }
     if (inputs.all === true || inputs.affected === false) {
-        return runNxAll(inputs, nxArgs);
+        return runNxAll(inputs, argsNx);
     }
     else if (inputs.projects.length > 0) {
-        return runNxProjects(inputs, nxArgs);
+        return runNxProjects(inputs, argsNx);
     }
     else {
-        return runNxAffected(inputs, nxArgs);
+        return runNxAffected(inputs, argsNx);
     }
 }
 
@@ -31394,6 +31396,11 @@ async function run() {
     if (inputs.workingDirectory && inputs.workingDirectory.length > 0) {
         coreExports.info(`🏃 Working in custom directory: ${inputs.workingDirectory}`);
         process.chdir(inputs.workingDirectory);
+    }
+    if (inputs.isWorkflowsCiPipeline) {
+        // used for .github/workflows/ci.yml
+        coreExports.info('Skipping running the nx command as skipNxCommand input is set to true');
+        return;
     }
     return runNx(inputs).catch((err) => {
         coreExports.setFailed(err);
