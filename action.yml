@@ -1,24 +1,54 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
+name: NX Command
+description: git action that executes NX commands
+author: dkhunt27
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: heart
-  color: red
+  icon: command
+  color: blue
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: Your input description here
+  affected: # Mutually exclusive with `all`
+    description:
+      "Use the Nx' affected subcommand to only process affected projects"
+    required: false
+    default: 'true'
+  all: # Mutually exclusive with `affected`
+    description: 'Run the targets on all projects'
+    required: false
+    default: 'false'
+  argsAddtl:
+    description: 'Optional arguments for the Nx command to append after "--"'
+    required: false
+    default: ''
+  argsNx:
+    description: 'Optional arguments to append to the Nx command'
+    required: false
+    default: ''
+  baseBoundaryOverride:
+    description: 'Parameter to use for overriding nx base commit'
+    required: false
+  headBoundaryOverride:
+    description: 'Parameter to use for overriding nx head commit'
+    required: false
+  parallel:
+    description: 'Number of tasks to execute in parallel (can be expensive)'
+    required: false
+    default: '3'
+  projects:
+    description: 'Comma-separated list of projects to use'
+    required: false
+  setNxBranchToPrNumber:
+    description:
+      'Set the NX_BRANCH environment variable to the pull request number'
+    required: false
+  targets:
+    description: 'Comma-separated list of targets to execute'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: Your output description here
+  workingDirectory:
+    description: 'Path to the Nx workspace, needed if not the repository root'
+    required: false
 
 runs:
-  using: node24
+  using: node20
   main: dist/index.js
