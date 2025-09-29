@@ -27300,6 +27300,8 @@ function parseInputs() {
     const workingDirectory = coreExports.getInput('workingDirectory');
     const baseBoundaryOverride = coreExports.getInput('baseBoundaryOverride');
     const headBoundaryOverride = coreExports.getInput('headBoundaryOverride');
+    // this is an internal flag used to skip running the actual nx command for testing purposes
+    const isWorkflowsCiPipeline = coreExports.getInput('isWorkflowsCiPipeline') === 'true';
     return {
         affected,
         all,
@@ -27307,6 +27309,7 @@ function parseInputs() {
         argsNx,
         baseBoundaryOverride,
         headBoundaryOverride,
+        isWorkflowsCiPipeline,
         parallel,
         projects,
         setNxBranchToPrNumber,
@@ -31393,6 +31396,11 @@ async function run() {
     if (inputs.workingDirectory && inputs.workingDirectory.length > 0) {
         coreExports.info(`🏃 Working in custom directory: ${inputs.workingDirectory}`);
         process.chdir(inputs.workingDirectory);
+    }
+    if (inputs.isWorkflowsCiPipeline) {
+        // used for .github/workflows/ci.yml
+        coreExports.info('Skipping running the nx command as skipNxCommand input is set to true');
+        return;
     }
     return runNx(inputs).catch((err) => {
         coreExports.setFailed(err);
