@@ -7,6 +7,7 @@ export type Inputs = {
   readonly argsNx: readonly string[]
   readonly baseBoundaryOverride: string
   readonly headBoundaryOverride: string
+  readonly isWorkflowsCiPipeline: boolean
   readonly parallel: number
   readonly projects: readonly string[]
   readonly setNxBranchToPrNumber: boolean
@@ -50,6 +51,10 @@ export function parseInputs(): Inputs {
 
   const headBoundaryOverride = core.getInput('headBoundaryOverride')
 
+  // this is an internal flag used to skip running the actual nx command for testing purposes
+  const isWorkflowsCiPipeline =
+    core.getInput('isWorkflowsCiPipeline') === 'true'
+
   return {
     affected,
     all,
@@ -57,6 +62,7 @@ export function parseInputs(): Inputs {
     argsNx,
     baseBoundaryOverride,
     headBoundaryOverride,
+    isWorkflowsCiPipeline,
     parallel,
     projects,
     setNxBranchToPrNumber,

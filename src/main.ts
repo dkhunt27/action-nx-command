@@ -15,6 +15,14 @@ export async function run(): Promise<void> {
     process.chdir(inputs.workingDirectory)
   }
 
+  if (inputs.isWorkflowsCiPipeline) {
+    // used for .github/workflows/ci.yml
+    core.info(
+      'Skipping running the nx command as skipNxCommand input is set to true'
+    )
+    return
+  }
+
   return runNx(inputs).catch((err: Error) => {
     core.setFailed(err)
   })

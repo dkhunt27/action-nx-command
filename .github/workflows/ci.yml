@@ -58,8 +58,9 @@ jobs:
         uses: ./
         with:
           targets: abc
-          argsNx: '--foo=bar'
+          argsNx: "--foo=bar"
           projects: app1
+          isWorkflowsCiPipeline: true
 
       - name: Print Output
         id: output
