@@ -5,6 +5,7 @@ export type Inputs = {
     readonly argsNx: readonly string[];
     readonly baseBoundaryOverride: string;
     readonly headBoundaryOverride: string;
+    readonly isWorkflowsCiPipeline: boolean;
     readonly parallel: number;
     readonly projects: readonly string[];
     readonly setNxBranchToPrNumber: boolean;
