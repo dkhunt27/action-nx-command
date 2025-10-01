@@ -1,8 +1,7 @@
 export type Inputs = {
     readonly affected: boolean;
     readonly all: boolean;
-    readonly argsAddtl: readonly string[];
-    readonly argsNx: readonly string[];
+    readonly args: readonly string[];
     readonly baseBoundaryOverride: string;
     readonly headBoundaryOverride: string;
     readonly isWorkflowsCiPipeline: boolean;
@@ -12,5 +11,5 @@ export type Inputs = {
     readonly targets: readonly string[];
     readonly workingDirectory: string;
 };
-export declare function parseArgs(raw: string): string[];
-export declare function parseInputs(): Inputs;
+export declare const parseArgs: (raw: string) => string[];
+export declare const parseInputs: () => Inputs;

@@ -3,8 +3,7 @@ import * as core from '@actions/core'
 export type Inputs = {
   readonly affected: boolean
   readonly all: boolean
-  readonly argsAddtl: readonly string[]
-  readonly argsNx: readonly string[]
+  readonly args: readonly string[]
   readonly baseBoundaryOverride: string
   readonly headBoundaryOverride: string
   readonly isWorkflowsCiPipeline: boolean
@@ -15,11 +14,11 @@ export type Inputs = {
   readonly workingDirectory: string
 }
 
-export function parseArgs(raw: string): string[] {
+export const parseArgs = (raw: string): string[] => {
   return raw.split(' ').filter((arg) => arg.length > 0)
 }
 
-export function parseInputs(): Inputs {
+export const parseInputs = (): Inputs => {
   const targets = core
     .getInput('targets', { required: true })
     .split(',')
@@ -34,13 +33,10 @@ export function parseInputs(): Inputs {
 
   const affected = core.getInput('affected') === 'true'
 
-  const parallel = Number.isNaN(parseInt(core.getInput('parallel')))
-    ? 3
-    : parseInt(core.getInput('parallel'))
+  const parallelNumber = Number(core.getInput('parallel'))
+  const parallel = Number.isNaN(parallelNumber) ? 3 : parallelNumber
 
-  const argsAddtl = parseArgs(core.getInput('argsAddtl'))
-
-  const argsNx = parseArgs(core.getInput('argsNx'))
+  const args = parseArgs(core.getInput('args'))
 
   const setNxBranchToPrNumber =
     core.getInput('setNxBranchToPrNumber') === 'true'
@@ -58,8 +54,7 @@ export function parseInputs(): Inputs {
   return {
     affected,
     all,
-    argsAddtl,
-    argsNx,
+    args,
     baseBoundaryOverride,
     headBoundaryOverride,
     isWorkflowsCiPipeline,

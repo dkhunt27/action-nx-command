@@ -17,11 +17,7 @@ inputs:
     description: 'Run the targets on all projects'
     required: false
     default: 'false'
-  argsAddtl:
-    description: 'Optional arguments for the Nx command to append after "--"'
-    required: false
-    default: ''
-  argsNx:
+  args:
     description: 'Optional arguments to append to the Nx command'
     required: false
     default: ''

@@ -1,140 +1,146 @@
 import * as core from '@actions/core'
-import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 import type { PullRequest, PushEvent } from '@octokit/webhooks-types'
 
 import type { Inputs } from './inputs.ts'
+import * as utils from './utils.ts'
 
-async function retrieveGitBoundaries(
+export const retrieveGitBoundaries = async (params: {
   inputs: Inputs
-): Promise<[base: string, head: string]> {
-  if (github.context.eventName === 'pull_request') {
-    const prPayload = github.context.payload.pull_request as PullRequest
-    return [prPayload.base.sha, prPayload.head.sha]
-  } else if (github.context.eventName === 'push') {
-    const pushPayload = github.context.payload as PushEvent
-    return [
-      inputs.baseBoundaryOverride || pushPayload.before,
-      inputs.headBoundaryOverride || pushPayload.after
-    ]
+  githubContextEventName: string
+  githubContextPayload: typeof github.context.payload
+  gitRevParse: (ref: string) => Promise<string>
+}): Promise<{ base: string; head: string }> => {
+  const { inputs, githubContextEventName, githubContextPayload, gitRevParse } =
+    params
+
+  let base = ''
+  let head = ''
+
+  if (githubContextEventName === 'pull_request') {
+    const prPayload = githubContextPayload.pull_request as PullRequest
+    base = prPayload.base.sha
+    head = prPayload.head.sha
+  } else if (githubContextEventName === 'push') {
+    const pushPayload = githubContextPayload as PushEvent
+    base = inputs.baseBoundaryOverride || pushPayload.before
+    head = inputs.headBoundaryOverride || pushPayload.after
   } else {
-    let base = ''
     if (inputs.baseBoundaryOverride) {
       base = inputs.baseBoundaryOverride
     } else {
-      await exec.exec('git', ['rev-parse', 'HEAD~1'], {
-        listeners: {
-          stdout: (data: Buffer) => (base += data.toString())
-        }
-      })
+      base = await gitRevParse('HEAD~1')
     }
 
-    let head = ''
     if (inputs.headBoundaryOverride) {
       head = inputs.headBoundaryOverride
     } else {
-      await exec.exec('git', ['rev-parse', 'HEAD'], {
-        listeners: {
-          stdout: (data: Buffer) => (head += data.toString())
-        }
-      })
+      head = await gitRevParse('HEAD')
     }
-
-    return [
-      base.replace(/(\r\n|\n|\r)/gm, ''),
-      head.replace(/(\r\n|\n|\r)/gm, '')
-    ]
   }
+
+  return { base, head }
 }
 
-async function nx(args: readonly string[]): Promise<void> {
-  await exec.exec(`npx nx ${args.join(' ')}`)
+const nx = async (args: readonly string[]): Promise<void> => {
+  await utils.execHandler(`npx nx ${args.join(' ')}`)
 }
 
-async function runNxAll(inputs: Inputs, argsNx: string[]): Promise<void> {
-  return inputs.targets.reduce(
-    (lastPromise, target) =>
-      lastPromise.then(() =>
-        nx([
-          'run-many',
-          `--target=${target}`,
-          '--all',
-          ...argsNx,
-          '--',
-          ...inputs.argsAddtl
-        ])
-      ),
-    Promise.resolve()
-  )
+const runNxAll = async (inputs: Inputs, args: string[]): Promise<void> => {
+  core.startGroup('Running NX All')
+
+  const promises = []
+  core.startGroup('Running nx targets...')
+  for (const target of inputs.targets) {
+    core.info(`Target: ${target}`)
+
+    promises.push(nx(['run-many', `--target=${target}`, ...args]))
+  }
+
+  await Promise.all(promises)
+
+  core.endGroup()
 }
 
-async function runNxProjects(inputs: Inputs, argsNx: string[]): Promise<void> {
-  return inputs.targets.reduce(
-    (lastPromise, target) =>
-      lastPromise.then(() =>
-        nx([
-          'run-many',
-          `--target=${target}`,
-          `--projects=${inputs.projects.join(',')}`,
-          ...argsNx,
-          '--',
-          ...inputs.argsAddtl
-        ])
-      ),
-    Promise.resolve()
-  )
+const runNxProjects = async (inputs: Inputs, args: string[]): Promise<void> => {
+  core.startGroup('Running NX Projects')
+
+  const promises = []
+  core.startGroup('Running nx targets...')
+  for (const target of inputs.targets) {
+    core.info(`Target: ${target}`)
+
+    promises.push(
+      nx([
+        'run-many',
+        `--target=${target}`,
+        `--projects=${inputs.projects.join(',')}`,
+        ...args
+      ])
+    )
+  }
+
+  await Promise.all(promises)
+
+  core.endGroup()
 }
 
-async function runNxAffected(inputs: Inputs, argsNx: string[]): Promise<void> {
-  const [base, head] = await core.group(
-    '🏷 Retrieving Git boundaries (affected command)',
-    () =>
-      retrieveGitBoundaries(inputs).then(([base, head]) => {
-        core.info(`Base boundary: ${base}`)
-        core.info(`Head boundary: ${head}`)
-        return [base, head]
-      })
-  )
+const runNxAffected = async (inputs: Inputs, args: string[]): Promise<void> => {
+  core.startGroup('Running NX Affected')
 
-  return inputs.targets.reduce(
-    (lastPromise, target) =>
-      lastPromise.then(() =>
-        nx([
-          'affected',
-          `--target=${target}`,
-          `--base=${base}`,
-          `--head=${head}`,
-          ...argsNx,
-          '--',
-          ...inputs.argsAddtl
-        ])
-      ),
-    Promise.resolve()
-  )
+  core.startGroup('Retrieving git boundaries...')
+  const { base, head } = await retrieveGitBoundaries({
+    inputs,
+    githubContextEventName: github.context.eventName,
+    githubContextPayload: github.context.payload,
+    gitRevParse: utils.gitRevParse
+  })
+
+  core.info(`Base boundary: ${base}`)
+  core.info(`Head boundary: ${head}`)
+
+  const promises = []
+  core.startGroup('Running nx targets...')
+  for (const target of inputs.targets) {
+    core.info(`Target: ${target}`)
+
+    promises.push(
+      nx([
+        'affected',
+        `--target=${target}`,
+        `--base=${base}`,
+        `--head=${head}`,
+        ...args
+      ])
+    )
+  }
+
+  await Promise.all(promises)
+
+  core.endGroup()
 }
 
-export async function runNx(inputs: Inputs): Promise<void> {
-  const argsNx = inputs.argsNx as string[]
+export const runNx = async (inputs: Inputs): Promise<void> => {
+  const args = inputs.args as string[]
 
-  core.info(`argsNx: ${argsNx.join()}`)
-  core.info(`argsAddtl: ${inputs.argsAddtl.join()}`)
+  core.info(`args: ${args.join()}`)
 
   if (inputs.setNxBranchToPrNumber) {
     if (github.context.eventName === 'pull_request') {
       const prPayload = github.context.payload.pull_request as PullRequest
-      process.env['NX_BRANCH'] = prPayload.number.toString()
+      process.env.NX_BRANCH = prPayload.number.toString()
     }
   }
 
   if (inputs.parallel) {
-    argsNx.push(`--parallel=${inputs.parallel.toString()}`)
+    args.push(`--parallel=${inputs.parallel.toString()}`)
   }
 
   if (inputs.all === true || inputs.affected === false) {
-    return runNxAll(inputs, argsNx)
+    return runNxAll(inputs, args)
   } else if (inputs.projects.length > 0) {
-    return runNxProjects(inputs, argsNx)
+    return runNxProjects(inputs, args)
   } else {
-    return runNxAffected(inputs, argsNx)
+    return runNxAffected(inputs, args)
   }
 }

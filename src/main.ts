@@ -2,16 +2,11 @@ import * as core from '@actions/core'
 import { parseInputs } from './inputs.ts'
 import { runNx } from './nx-command.ts'
 
-/**
- * The main function for the action.
- *
- * @returns Resolves when the action is complete.
- */
-export async function run(): Promise<void> {
+export const run = async (): Promise<void> => {
   const inputs = parseInputs()
 
   if (inputs.workingDirectory && inputs.workingDirectory.length > 0) {
-    core.info(`🏃 Working in custom directory: ${inputs.workingDirectory}`)
+    core.info(`Working in custom directory: ${inputs.workingDirectory}`)
     process.chdir(inputs.workingDirectory)
   }
 
@@ -20,10 +15,11 @@ export async function run(): Promise<void> {
     core.info(
       'Skipping running the nx command as skipNxCommand input is set to true'
     )
-    return
+  } else {
+    try {
+      await runNx(inputs)
+    } catch (error) {
+      core.setFailed(error as never)
+    }
   }
-
-  return runNx(inputs).catch((err: Error) => {
-    core.setFailed(err)
-  })
 }
