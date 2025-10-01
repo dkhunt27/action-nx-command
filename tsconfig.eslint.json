@@ -12,7 +12,9 @@
     "src",
     "eslint.config.mjs",
     "jest.config.js",
+    "jest.preset.cjs",
     "rollup.config.ts",
-    "apps"
+    "apps",
+    "tmp"
   ]
 }
