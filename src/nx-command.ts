@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as exec from '@actions/exec'
 import * as github from '@actions/github'
 import type { PullRequest, PushEvent } from '@octokit/webhooks-types'
 
@@ -43,14 +44,15 @@ export const retrieveGitBoundaries = async (params: {
 }
 
 const nx = async (args: readonly string[]): Promise<void> => {
-  await utils.execHandler(`npx nx ${args.join(' ')}`)
+  // using exec.exec instead of execHandler to stream output to console
+  await exec.exec(`npx nx ${args.join(' ')}`)
 }
 
 const runNxAll = async (inputs: Inputs, args: string[]): Promise<void> => {
   core.startGroup('Running NX All')
 
   const promises = []
-  core.startGroup('Running nx targets...')
+  core.info('Running nx targets...')
   for (const target of inputs.targets) {
     core.info(`Target: ${target}`)
 
@@ -66,7 +68,7 @@ const runNxProjects = async (inputs: Inputs, args: string[]): Promise<void> => {
   core.startGroup('Running NX Projects')
 
   const promises = []
-  core.startGroup('Running nx targets...')
+  core.info('Running nx targets...')
   for (const target of inputs.targets) {
     core.info(`Target: ${target}`)
 
@@ -88,7 +90,7 @@ const runNxProjects = async (inputs: Inputs, args: string[]): Promise<void> => {
 const runNxAffected = async (inputs: Inputs, args: string[]): Promise<void> => {
   core.startGroup('Running NX Affected')
 
-  core.startGroup('Retrieving git boundaries...')
+  core.info('Retrieving git boundaries...')
   const { base, head } = await retrieveGitBoundaries({
     inputs,
     githubContextEventName: github.context.eventName,
@@ -100,7 +102,7 @@ const runNxAffected = async (inputs: Inputs, args: string[]): Promise<void> => {
   core.info(`Head boundary: ${head}`)
 
   const promises = []
-  core.startGroup('Running nx targets...')
+  core.info('Running nx targets...')
   for (const target of inputs.targets) {
     core.info(`Target: ${target}`)
 
