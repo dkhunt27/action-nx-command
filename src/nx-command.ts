@@ -51,24 +51,17 @@ async function nx(args: readonly string[]): Promise<void> {
   await exec.exec(`npx nx ${args.join(' ')}`)
 }
 
-async function runNxAll(inputs: Inputs, argsNx: string[]): Promise<void> {
+async function runNxAll(inputs: Inputs, args: string[]): Promise<void> {
   return inputs.targets.reduce(
     (lastPromise, target) =>
       lastPromise.then(() =>
-        nx([
-          'run-many',
-          `--target=${target}`,
-          '--all',
-          ...argsNx,
-          '--',
-          ...inputs.argsAddtl
-        ])
+        nx(['run-many', `--target=${target}`, '--all', ...args])
       ),
     Promise.resolve()
   )
 }
 
-async function runNxProjects(inputs: Inputs, argsNx: string[]): Promise<void> {
+async function runNxProjects(inputs: Inputs, args: string[]): Promise<void> {
   return inputs.targets.reduce(
     (lastPromise, target) =>
       lastPromise.then(() =>
@@ -76,16 +69,14 @@ async function runNxProjects(inputs: Inputs, argsNx: string[]): Promise<void> {
           'run-many',
           `--target=${target}`,
           `--projects=${inputs.projects.join(',')}`,
-          ...argsNx,
-          '--',
-          ...inputs.argsAddtl
+          ...args
         ])
       ),
     Promise.resolve()
   )
 }
 
-async function runNxAffected(inputs: Inputs, argsNx: string[]): Promise<void> {
+async function runNxAffected(inputs: Inputs, args: string[]): Promise<void> {
   const [base, head] = await core.group(
     '🏷 Retrieving Git boundaries (affected command)',
     () =>
@@ -104,9 +95,7 @@ async function runNxAffected(inputs: Inputs, argsNx: string[]): Promise<void> {
           `--target=${target}`,
           `--base=${base}`,
           `--head=${head}`,
-          ...argsNx,
-          '--',
-          ...inputs.argsAddtl
+          ...args
         ])
       ),
     Promise.resolve()
@@ -114,10 +103,9 @@ async function runNxAffected(inputs: Inputs, argsNx: string[]): Promise<void> {
 }
 
 export async function runNx(inputs: Inputs): Promise<void> {
-  const argsNx = inputs.argsNx as string[]
+  const args = inputs.args as string[]
 
-  core.info(`argsNx: ${argsNx.join()}`)
-  core.info(`argsAddtl: ${inputs.argsAddtl.join()}`)
+  core.info(`args: ${args.join()}`)
 
   if (inputs.setNxBranchToPrNumber) {
     if (github.context.eventName === 'pull_request') {
@@ -127,14 +115,14 @@ export async function runNx(inputs: Inputs): Promise<void> {
   }
 
   if (inputs.parallel) {
-    argsNx.push(`--parallel=${inputs.parallel.toString()}`)
+    args.push(`--parallel=${inputs.parallel.toString()}`)
   }
 
   if (inputs.all === true || inputs.affected === false) {
-    return runNxAll(inputs, argsNx)
+    return runNxAll(inputs, args)
   } else if (inputs.projects.length > 0) {
-    return runNxProjects(inputs, argsNx)
+    return runNxProjects(inputs, args)
   } else {
-    return runNxAffected(inputs, argsNx)
+    return runNxAffected(inputs, args)
   }
 }

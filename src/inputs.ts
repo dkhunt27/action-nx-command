@@ -3,8 +3,7 @@ import * as core from '@actions/core'
 export type Inputs = {
   readonly affected: boolean
   readonly all: boolean
-  readonly argsAddtl: readonly string[]
-  readonly argsNx: readonly string[]
+  readonly args: readonly string[]
   readonly baseBoundaryOverride: string
   readonly headBoundaryOverride: string
   readonly isWorkflowsCiPipeline: boolean
@@ -38,9 +37,7 @@ export function parseInputs(): Inputs {
     ? 3
     : parseInt(core.getInput('parallel'))
 
-  const argsAddtl = parseArgs(core.getInput('argsAddtl'))
-
-  const argsNx = parseArgs(core.getInput('argsNx'))
+  const args = parseArgs(core.getInput('args'))
 
   const setNxBranchToPrNumber =
     core.getInput('setNxBranchToPrNumber') === 'true'
@@ -58,8 +55,7 @@ export function parseInputs(): Inputs {
   return {
     affected,
     all,
-    argsAddtl,
-    argsNx,
+    args,
     baseBoundaryOverride,
     headBoundaryOverride,
     isWorkflowsCiPipeline,

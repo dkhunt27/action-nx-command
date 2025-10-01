@@ -1,8 +1,7 @@
 export type Inputs = {
     readonly affected: boolean;
     readonly all: boolean;
-    readonly argsAddtl: readonly string[];
-    readonly argsNx: readonly string[];
+    readonly args: readonly string[];
     readonly baseBoundaryOverride: string;
     readonly headBoundaryOverride: string;
     readonly isWorkflowsCiPipeline: boolean;

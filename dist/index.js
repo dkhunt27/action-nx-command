@@ -27294,8 +27294,7 @@ function parseInputs() {
     const parallel = Number.isNaN(parseInt(coreExports.getInput('parallel')))
         ? 3
         : parseInt(coreExports.getInput('parallel'));
-    const argsAddtl = parseArgs(coreExports.getInput('argsAddtl'));
-    const argsNx = parseArgs(coreExports.getInput('argsNx'));
+    const args = parseArgs(coreExports.getInput('args'));
     const setNxBranchToPrNumber = coreExports.getInput('setNxBranchToPrNumber') === 'true';
     const workingDirectory = coreExports.getInput('workingDirectory');
     const baseBoundaryOverride = coreExports.getInput('baseBoundaryOverride');
@@ -27305,8 +27304,7 @@ function parseInputs() {
     return {
         affected,
         all,
-        argsAddtl,
-        argsNx,
+        args,
         baseBoundaryOverride,
         headBoundaryOverride,
         isWorkflowsCiPipeline,
@@ -31326,27 +31324,18 @@ async function retrieveGitBoundaries(inputs) {
 async function nx(args) {
     await execExports.exec(`npx nx ${args.join(' ')}`);
 }
-async function runNxAll(inputs, argsNx) {
-    return inputs.targets.reduce((lastPromise, target) => lastPromise.then(() => nx([
-        'run-many',
-        `--target=${target}`,
-        '--all',
-        ...argsNx,
-        '--',
-        ...inputs.argsAddtl
-    ])), Promise.resolve());
+async function runNxAll(inputs, args) {
+    return inputs.targets.reduce((lastPromise, target) => lastPromise.then(() => nx(['run-many', `--target=${target}`, '--all', ...args])), Promise.resolve());
 }
-async function runNxProjects(inputs, argsNx) {
+async function runNxProjects(inputs, args) {
     return inputs.targets.reduce((lastPromise, target) => lastPromise.then(() => nx([
         'run-many',
         `--target=${target}`,
         `--projects=${inputs.projects.join(',')}`,
-        ...argsNx,
-        '--',
-        ...inputs.argsAddtl
+        ...args
     ])), Promise.resolve());
 }
-async function runNxAffected(inputs, argsNx) {
+async function runNxAffected(inputs, args) {
     const [base, head] = await coreExports.group('🏷 Retrieving Git boundaries (affected command)', () => retrieveGitBoundaries(inputs).then(([base, head]) => {
         coreExports.info(`Base boundary: ${base}`);
         coreExports.info(`Head boundary: ${head}`);
@@ -31357,15 +31346,12 @@ async function runNxAffected(inputs, argsNx) {
         `--target=${target}`,
         `--base=${base}`,
         `--head=${head}`,
-        ...argsNx,
-        '--',
-        ...inputs.argsAddtl
+        ...args
     ])), Promise.resolve());
 }
 async function runNx(inputs) {
-    const argsNx = inputs.argsNx;
-    coreExports.info(`argsNx: ${argsNx.join()}`);
-    coreExports.info(`argsAddtl: ${inputs.argsAddtl.join()}`);
+    const args = inputs.args;
+    coreExports.info(`args: ${args.join()}`);
     if (inputs.setNxBranchToPrNumber) {
         if (githubExports.context.eventName === 'pull_request') {
             const prPayload = githubExports.context.payload.pull_request;
@@ -31373,16 +31359,16 @@ async function runNx(inputs) {
         }
     }
     if (inputs.parallel) {
-        argsNx.push(`--parallel=${inputs.parallel.toString()}`);
+        args.push(`--parallel=${inputs.parallel.toString()}`);
     }
     if (inputs.all === true || inputs.affected === false) {
-        return runNxAll(inputs, argsNx);
+        return runNxAll(inputs, args);
     }
     else if (inputs.projects.length > 0) {
-        return runNxProjects(inputs, argsNx);
+        return runNxProjects(inputs, args);
     }
     else {
-        return runNxAffected(inputs, argsNx);
+        return runNxAffected(inputs, args);
     }
 }
 
