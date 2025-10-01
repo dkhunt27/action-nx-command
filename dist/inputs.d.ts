@@ -11,5 +11,5 @@ export type Inputs = {
     readonly targets: readonly string[];
     readonly workingDirectory: string;
 };
-export declare function parseArgs(raw: string): string[];
-export declare function parseInputs(): Inputs;
+export declare const parseArgs: (raw: string) => string[];
+export declare const parseInputs: () => Inputs;

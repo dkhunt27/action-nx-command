@@ -14,11 +14,11 @@ export type Inputs = {
   readonly workingDirectory: string
 }
 
-export function parseArgs(raw: string): string[] {
+export const parseArgs = (raw: string): string[] => {
   return raw.split(' ').filter((arg) => arg.length > 0)
 }
 
-export function parseInputs(): Inputs {
+export const parseInputs = (): Inputs => {
   const targets = core
     .getInput('targets', { required: true })
     .split(',')
@@ -33,9 +33,8 @@ export function parseInputs(): Inputs {
 
   const affected = core.getInput('affected') === 'true'
 
-  const parallel = Number.isNaN(parseInt(core.getInput('parallel')))
-    ? 3
-    : parseInt(core.getInput('parallel'))
+  const parallelNumber = Number(core.getInput('parallel'))
+  const parallel = Number.isNaN(parallelNumber) ? 3 : parallelNumber
 
   const args = parseArgs(core.getInput('args'))
 

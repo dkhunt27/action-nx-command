@@ -14,7 +14,7 @@ import require$$7 from 'buffer';
 import require$$8 from 'querystring';
 import require$$14 from 'stream/web';
 import require$$0$7 from 'node:stream';
-import require$$1$2 from 'node:util';
+import require$$1$2, { promisify } from 'node:util';
 import require$$0$6 from 'node:events';
 import require$$0$8 from 'worker_threads';
 import require$$2$2 from 'perf_hooks';
@@ -27,6 +27,7 @@ import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
 import require$$2$3 from 'child_process';
 import require$$6$1 from 'timers';
+import { exec as exec$1 } from 'node:child_process';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -27279,10 +27280,10 @@ function requireCore () {
 
 var coreExports = requireCore();
 
-function parseArgs(raw) {
+const parseArgs = (raw) => {
     return raw.split(' ').filter((arg) => arg.length > 0);
-}
-function parseInputs() {
+};
+const parseInputs = () => {
     const targets = coreExports.getInput('targets', { required: true })
         .split(',')
         .filter((target) => target.length > 0);
@@ -27291,9 +27292,8 @@ function parseInputs() {
         .filter((project) => project.length > 0);
     const all = coreExports.getInput('all') === 'true';
     const affected = coreExports.getInput('affected') === 'true';
-    const parallel = Number.isNaN(parseInt(coreExports.getInput('parallel')))
-        ? 3
-        : parseInt(coreExports.getInput('parallel'));
+    const parallelNumber = Number(coreExports.getInput('parallel'));
+    const parallel = Number.isNaN(parallelNumber) ? 3 : parallelNumber;
     const args = parseArgs(coreExports.getInput('args'));
     const setNxBranchToPrNumber = coreExports.getInput('setNxBranchToPrNumber') === 'true';
     const workingDirectory = coreExports.getInput('workingDirectory');
@@ -27314,9 +27314,7 @@ function parseInputs() {
         targets,
         workingDirectory
     };
-}
-
-var execExports = requireExec();
+};
 
 var github = {};
 
@@ -31280,82 +31278,110 @@ function requireGithub () {
 
 var githubExports = requireGithub();
 
-async function retrieveGitBoundaries(inputs) {
-    if (githubExports.context.eventName === 'pull_request') {
-        const prPayload = githubExports.context.payload.pull_request;
-        return [prPayload.base.sha, prPayload.head.sha];
+const execPromise = promisify(exec$1);
+const execHandler = async (command) => {
+    const { stdout, stderr } = await execPromise(command);
+    if (stderr) {
+        throw stderr;
     }
-    else if (githubExports.context.eventName === 'push') {
-        const pushPayload = githubExports.context.payload;
-        return [
-            inputs.baseBoundaryOverride || pushPayload.before,
-            inputs.headBoundaryOverride || pushPayload.after
-        ];
+    return stdout;
+};
+const gitRevParse = async (ref) => {
+    const result = await execHandler(`git rev-parse ${ref}`);
+    return result.replace(/(\r\n|\n|\r)/gm, '');
+};
+const retrieveGitBoundaries = async (params) => {
+    const { inputs, githubContextEventName, githubContextPayload } = params;
+    let base = '';
+    let head = '';
+    if (githubContextEventName === 'pull_request') {
+        const prPayload = githubContextPayload.pull_request;
+        base = prPayload.base.sha;
+        head = prPayload.head.sha;
+    }
+    else if (githubContextEventName === 'push') {
+        const pushPayload = githubContextPayload;
+        base = inputs.baseBoundaryOverride || pushPayload.before;
+        head = inputs.headBoundaryOverride || pushPayload.after;
     }
     else {
-        let base = '';
         if (inputs.baseBoundaryOverride) {
             base = inputs.baseBoundaryOverride;
         }
         else {
-            await execExports.exec('git', ['rev-parse', 'HEAD~1'], {
-                listeners: {
-                    stdout: (data) => (base += data.toString())
-                }
-            });
+            base = await gitRevParse('HEAD~1');
         }
-        let head = '';
         if (inputs.headBoundaryOverride) {
             head = inputs.headBoundaryOverride;
         }
         else {
-            await execExports.exec('git', ['rev-parse', 'HEAD'], {
-                listeners: {
-                    stdout: (data) => (head += data.toString())
-                }
-            });
+            head = await gitRevParse('HEAD');
         }
-        return [
-            base.replace(/(\r\n|\n|\r)/gm, ''),
-            head.replace(/(\r\n|\n|\r)/gm, '')
-        ];
     }
-}
-async function nx(args) {
-    await execExports.exec(`npx nx ${args.join(' ')}`);
-}
-async function runNxAll(inputs, args) {
-    return inputs.targets.reduce((lastPromise, target) => lastPromise.then(() => nx(['run-many', `--target=${target}`, '--all', ...args])), Promise.resolve());
-}
-async function runNxProjects(inputs, args) {
-    return inputs.targets.reduce((lastPromise, target) => lastPromise.then(() => nx([
-        'run-many',
-        `--target=${target}`,
-        `--projects=${inputs.projects.join(',')}`,
-        ...args
-    ])), Promise.resolve());
-}
-async function runNxAffected(inputs, args) {
-    const [base, head] = await coreExports.group('🏷 Retrieving Git boundaries (affected command)', () => retrieveGitBoundaries(inputs).then(([base, head]) => {
-        coreExports.info(`Base boundary: ${base}`);
-        coreExports.info(`Head boundary: ${head}`);
-        return [base, head];
-    }));
-    return inputs.targets.reduce((lastPromise, target) => lastPromise.then(() => nx([
-        'affected',
-        `--target=${target}`,
-        `--base=${base}`,
-        `--head=${head}`,
-        ...args
-    ])), Promise.resolve());
-}
-async function runNx(inputs) {
+    return { base, head };
+};
+const nx = async (args) => {
+    await execHandler(`npx nx ${args.join(' ')}`);
+};
+const runNxAll = async (inputs, args) => {
+    coreExports.startGroup('Running NX All');
+    const promises = [];
+    coreExports.startGroup('Running nx targets...');
+    for (const target of inputs.targets) {
+        coreExports.info(`Target: ${target}`);
+        promises.push(nx(['run-many', `--target=${target}`, ...args]));
+    }
+    await Promise.all(promises);
+    coreExports.endGroup();
+};
+const runNxProjects = async (inputs, args) => {
+    coreExports.startGroup('Running NX Projects');
+    const promises = [];
+    coreExports.startGroup('Running nx targets...');
+    for (const target of inputs.targets) {
+        coreExports.info(`Target: ${target}`);
+        promises.push(nx([
+            'run-many',
+            `--target=${target}`,
+            `--projects=${inputs.projects.join(',')}`,
+            ...args
+        ]));
+    }
+    await Promise.all(promises);
+    coreExports.endGroup();
+};
+const runNxAffected = async (inputs, args) => {
+    coreExports.startGroup('Running NX Affected');
+    coreExports.startGroup('Retrieving git boundaries...');
+    const { base, head } = await retrieveGitBoundaries({
+        inputs,
+        githubContextEventName: githubExports.context.eventName,
+        githubContextPayload: githubExports.context.payload
+    });
+    coreExports.info(`Base boundary: ${base}`);
+    coreExports.info(`Head boundary: ${head}`);
+    const promises = [];
+    coreExports.startGroup('Running nx targets...');
+    for (const target of inputs.targets) {
+        coreExports.info(`Target: ${target}`);
+        promises.push(nx([
+            'affected',
+            `--target=${target}`,
+            `--base=${base}`,
+            `--head=${head}`,
+            ...args
+        ]));
+    }
+    await Promise.all(promises);
+    coreExports.endGroup();
+};
+const runNx = async (inputs) => {
     const args = inputs.args;
     coreExports.info(`args: ${args.join()}`);
     if (inputs.setNxBranchToPrNumber) {
         if (githubExports.context.eventName === 'pull_request') {
             const prPayload = githubExports.context.payload.pull_request;
-            process.env['NX_BRANCH'] = prPayload.number.toString();
+            process.env.NX_BRANCH = prPayload.number.toString();
         }
     }
     if (inputs.parallel) {
@@ -31370,28 +31396,27 @@ async function runNx(inputs) {
     else {
         return runNxAffected(inputs, args);
     }
-}
+};
 
-/**
- * The main function for the action.
- *
- * @returns Resolves when the action is complete.
- */
-async function run() {
+const run = async () => {
     const inputs = parseInputs();
     if (inputs.workingDirectory && inputs.workingDirectory.length > 0) {
-        coreExports.info(`🏃 Working in custom directory: ${inputs.workingDirectory}`);
+        coreExports.info(`Working in custom directory: ${inputs.workingDirectory}`);
         process.chdir(inputs.workingDirectory);
     }
     if (inputs.isWorkflowsCiPipeline) {
         // used for .github/workflows/ci.yml
         coreExports.info('Skipping running the nx command as skipNxCommand input is set to true');
-        return;
     }
-    return runNx(inputs).catch((err) => {
-        coreExports.setFailed(err);
-    });
-}
+    else {
+        try {
+            await runNx(inputs);
+        }
+        catch (error) {
+            coreExports.setFailed(error);
+        }
+    }
+};
 
 /**
  * The entrypoint for the action. This file simply imports and runs the action's
