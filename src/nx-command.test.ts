@@ -1,4 +1,5 @@
-import { gitRevParse, retrieveGitBoundaries } from './nx-command.ts'
+import { retrieveGitBoundaries } from './nx-command.ts'
+import * as utils from './utils.ts'
 
 describe('nx-command tests', () => {
   describe('retrieveGitBoundaries', () => {
@@ -12,7 +13,8 @@ describe('nx-command tests', () => {
               base: { sha: 'base-sha' },
               head: { sha: 'head-sha' }
             } as never
-          }
+          },
+          gitRevParse: utils.gitRevParse
         })
       ).resolves.toEqual({ base: 'base-sha', head: 'head-sha' })
     })
@@ -24,7 +26,8 @@ describe('nx-command tests', () => {
           githubContextPayload: {
             before: 'before-sha',
             after: 'after-sha'
-          }
+          },
+          gitRevParse: utils.gitRevParse
         })
       ).resolves.toEqual({ base: 'before-sha', head: 'after-sha' })
     })
@@ -39,7 +42,8 @@ describe('nx-command tests', () => {
           githubContextPayload: {
             before: 'before-sha',
             after: 'after-sha'
-          }
+          },
+          gitRevParse: utils.gitRevParse
         })
       ).resolves.toEqual({
         base: 'override-base-sha',
@@ -47,9 +51,6 @@ describe('nx-command tests', () => {
       })
     })
     test('when not pull request or push event, should use git reverse parse', async () => {
-      const head = await gitRevParse('HEAD')
-      const base = await gitRevParse('HEAD~1')
-
       await expect(
         retrieveGitBoundaries({
           inputs: {} as never,
@@ -57,9 +58,14 @@ describe('nx-command tests', () => {
           githubContextPayload: {
             before: 'before-sha',
             after: 'after-sha'
+          },
+          gitRevParse: (ref: string) => {
+            if (ref === 'HEAD~1') return Promise.resolve('base-sha')
+            if (ref === 'HEAD') return Promise.resolve('head-sha')
+            return Promise.reject('unknown ref')
           }
         })
-      ).resolves.toEqual({ base, head })
+      ).resolves.toEqual({ base: 'base-sha', head: 'head-sha' })
     })
   })
 })

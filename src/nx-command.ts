@@ -1,32 +1,18 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import type { PullRequest, PushEvent } from '@octokit/webhooks-types'
-import { exec } from 'node:child_process'
-import { promisify } from 'node:util'
 
 import type { Inputs } from './inputs.ts'
-
-const execPromise = promisify(exec)
-
-const execHandler = async (command: string): Promise<string> => {
-  const { stdout, stderr } = await execPromise(command)
-  if (stderr) {
-    throw stderr
-  }
-  return stdout
-}
-
-export const gitRevParse = async (ref: string): Promise<string> => {
-  const result = await execHandler(`git rev-parse ${ref}`)
-  return result.replace(/(\r\n|\n|\r)/gm, '')
-}
+import * as utils from './utils.ts'
 
 export const retrieveGitBoundaries = async (params: {
   inputs: Inputs
   githubContextEventName: string
   githubContextPayload: typeof github.context.payload
+  gitRevParse: (ref: string) => Promise<string>
 }): Promise<{ base: string; head: string }> => {
-  const { inputs, githubContextEventName, githubContextPayload } = params
+  const { inputs, githubContextEventName, githubContextPayload, gitRevParse } =
+    params
 
   let base = ''
   let head = ''
@@ -57,7 +43,7 @@ export const retrieveGitBoundaries = async (params: {
 }
 
 const nx = async (args: readonly string[]): Promise<void> => {
-  await execHandler(`npx nx ${args.join(' ')}`)
+  await utils.execHandler(`npx nx ${args.join(' ')}`)
 }
 
 const runNxAll = async (inputs: Inputs, args: string[]): Promise<void> => {
@@ -106,7 +92,8 @@ const runNxAffected = async (inputs: Inputs, args: string[]): Promise<void> => {
   const { base, head } = await retrieveGitBoundaries({
     inputs,
     githubContextEventName: github.context.eventName,
-    githubContextPayload: github.context.payload
+    githubContextPayload: github.context.payload,
+    gitRevParse: utils.gitRevParse
   })
 
   core.info(`Base boundary: ${base}`)

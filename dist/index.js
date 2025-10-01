@@ -31290,8 +31290,9 @@ const gitRevParse = async (ref) => {
     const result = await execHandler(`git rev-parse ${ref}`);
     return result.replace(/(\r\n|\n|\r)/gm, '');
 };
+
 const retrieveGitBoundaries = async (params) => {
-    const { inputs, githubContextEventName, githubContextPayload } = params;
+    const { inputs, githubContextEventName, githubContextPayload, gitRevParse } = params;
     let base = '';
     let head = '';
     if (githubContextEventName === 'pull_request') {
@@ -31356,7 +31357,8 @@ const runNxAffected = async (inputs, args) => {
     const { base, head } = await retrieveGitBoundaries({
         inputs,
         githubContextEventName: githubExports.context.eventName,
-        githubContextPayload: githubExports.context.payload
+        githubContextPayload: githubExports.context.payload,
+        gitRevParse: gitRevParse
     });
     coreExports.info(`Base boundary: ${base}`);
     coreExports.info(`Head boundary: ${head}`);
