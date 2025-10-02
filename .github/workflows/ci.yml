@@ -57,6 +57,7 @@ jobs:
         id: test-action
         uses: ./
         with:
-          targets: eslint:lint
-          projects: test-app
-          isWorkflowsCiPipeline: false
+          targets: abc
+          args: '--foo=bar'
+          projects: app1
+          isWorkflowsCiPipeline: true

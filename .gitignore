@@ -100,10 +100,3 @@ __tests__/runner/*
 # IDE files
 .idea
 *.code-workspace
-
-
-
-.nx/cache
-.nx/workspace-data
-apps/dist
-tmp/
