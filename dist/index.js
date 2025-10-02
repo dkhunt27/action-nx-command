@@ -27316,6 +27316,8 @@ const parseInputs = () => {
     };
 };
 
+var execExports = requireExec();
+
 var github = {};
 
 var context = {};
@@ -31322,12 +31324,13 @@ const retrieveGitBoundaries = async (params) => {
     return { base, head };
 };
 const nx = async (args) => {
-    await execHandler(`npx nx ${args.join(' ')}`);
+    // using exec.exec instead of execHandler to stream output to console
+    await execExports.exec(`npx nx ${args.join(' ')}`);
 };
 const runNxAll = async (inputs, args) => {
     coreExports.startGroup('Running NX All');
     const promises = [];
-    coreExports.startGroup('Running nx targets...');
+    coreExports.info('Running nx targets...');
     for (const target of inputs.targets) {
         coreExports.info(`Target: ${target}`);
         promises.push(nx(['run-many', `--target=${target}`, ...args]));
@@ -31338,7 +31341,7 @@ const runNxAll = async (inputs, args) => {
 const runNxProjects = async (inputs, args) => {
     coreExports.startGroup('Running NX Projects');
     const promises = [];
-    coreExports.startGroup('Running nx targets...');
+    coreExports.info('Running nx targets...');
     for (const target of inputs.targets) {
         coreExports.info(`Target: ${target}`);
         promises.push(nx([
@@ -31353,7 +31356,7 @@ const runNxProjects = async (inputs, args) => {
 };
 const runNxAffected = async (inputs, args) => {
     coreExports.startGroup('Running NX Affected');
-    coreExports.startGroup('Retrieving git boundaries...');
+    coreExports.info('Retrieving git boundaries...');
     const { base, head } = await retrieveGitBoundaries({
         inputs,
         githubContextEventName: githubExports.context.eventName,
@@ -31363,7 +31366,7 @@ const runNxAffected = async (inputs, args) => {
     coreExports.info(`Base boundary: ${base}`);
     coreExports.info(`Head boundary: ${head}`);
     const promises = [];
-    coreExports.startGroup('Running nx targets...');
+    coreExports.info('Running nx targets...');
     for (const target of inputs.targets) {
         coreExports.info(`Target: ${target}`);
         promises.push(nx([
