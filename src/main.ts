@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import { parseInputs } from './inputs.ts'
-import { runNx } from './nx-command.ts'
+import { runNx } from 'action-nx-command-wrapper'
 
 export const run = async (): Promise<void> => {
   const inputs = parseInputs()
