@@ -8,9 +8,8 @@ branding:
 
 # Define your inputs here.
 inputs:
-  command: 
-    description:
-      "NX command to run.,"
+  command:
+    description: 'NX command to run.,'
     required: true
     values:
       - 'targetedAll'
@@ -19,7 +18,8 @@ inputs:
       - 'showAffectedList'
 
   affectedToIgnore:
-    description: 'Command: showAffectedList -- Projects to ignore (comma-separated)'
+    description:
+      'Command: showAffectedList -- Projects to ignore (comma-separated)'
     required: false
     default: ''
   args:
@@ -27,10 +27,14 @@ inputs:
     required: false
     default: ''
   baseBoundaryOverride:
-    description: 'Command: targetedAffected, showAffectedList -- Parameter to use for overriding nx base commit'
+    description:
+      'Command: targetedAffected, showAffectedList -- Parameter to use for
+      overriding nx base commit'
     required: false
   headBoundaryOverride:
-    description: 'Command: targetedAffected, showAffectedList -- Parameter to use for overriding nx head commit'
+    description:
+      'Command: targetedAffected, showAffectedList -- Parameter to use for
+      overriding nx head commit'
     required: false
   isWorkflowsCiPipeline:
     description:
@@ -42,14 +46,18 @@ inputs:
     required: false
     default: '3'
   projects:
-    description: 'Command: targetedProjects -- Comma-separated list of projects to pass to nx command'
+    description:
+      'Command: targetedProjects -- Comma-separated list of projects to pass to
+      nx command'
     required: false
   setNxBranchToPrNumber:
     description:
       'Set the NX_BRANCH environment variable to the pull request number'
     required: false
   targets:
-    description: 'Command: targeted* (required), showAffectedList(optional) -- Comma-separated list of targets to execute'
+    description:
+      'Command: targeted* (required), showAffectedList(optional) --
+      Comma-separated list of targets to execute'
     required: true
   workingDirectory:
     description: 'Path to the Nx workspace, needed if not the repository root'
