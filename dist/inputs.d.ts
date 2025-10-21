@@ -1,15 +1,3 @@
-export type Inputs = {
-    readonly affected: boolean;
-    readonly all: boolean;
-    readonly args: readonly string[];
-    readonly baseBoundaryOverride: string;
-    readonly headBoundaryOverride: string;
-    readonly isWorkflowsCiPipeline: boolean;
-    readonly parallel: number;
-    readonly projects: readonly string[];
-    readonly setNxBranchToPrNumber: boolean;
-    readonly targets: readonly string[];
-    readonly workingDirectory: string;
-};
+import type { NxCommandInputs } from 'action-nx-command-wrapper';
 export declare const parseArgs: (raw: string) => string[];
-export declare const parseInputs: () => Inputs;
+export declare const parseInputs: () => NxCommandInputs;
