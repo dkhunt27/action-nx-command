@@ -31306,9 +31306,9 @@ const execPromisified = async (command, execOverride) => {
 const validateInputs = (inputs) => {
 	coreExports.info("Validating inputs...");
 	switch (inputs.command) {
-		case "targetedProjects": if (inputs.projects.length === 0) throw new Error(`Projects cannot be empty when command is ${inputs.command}.`);
-		case "targetedAll":
-		case "targetedAffected":
+		case "runManyListedTargetsAndListedProjects": if (inputs.projects.length === 0) throw new Error(`Projects cannot be empty when command is ${inputs.command}.`);
+		case "runManyListedTargetsAndAllProjects":
+		case "runManyListedTargetsAndAffectedProjects":
 			if (inputs.targets.length === 0) throw new Error(`Targets cannot be empty when command is ${inputs.command}.`);
 			break;
 		case "showAffectedList":
@@ -31432,9 +31432,9 @@ const runNx = async (inputs) => {
 	}
 	if (inputs.parallel) args.push(`--parallel=${inputs.parallel.toString()}`);
 	switch (inputs.command) {
-		case "targetedAll": return runTargetedNxAll(inputs, args);
-		case "targetedProjects": return runTargetedNxProjects(inputs, args);
-		case "targetedAffected": return runTargetedNxAffected(inputs, args);
+		case "runManyListedTargetsAndAllProjects": return runTargetedNxAll(inputs, args);
+		case "runManyListedTargetsAndListedProjects": return runTargetedNxProjects(inputs, args);
+		case "runManyListedTargetsAndAffectedProjects": return runTargetedNxAffected(inputs, args);
 		case "showAffectedList": return runShowNxAffectedList(inputs, args);
 		default: throw new Error(`Invalid command: ${inputs.command}`);
 	}

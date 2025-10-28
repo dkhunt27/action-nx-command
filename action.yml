@@ -9,12 +9,12 @@ branding:
 # Define your inputs here.
 inputs:
   command:
-    description: 'NX command to run.,'
+    description: 'NX command to run'
     required: true
     options:
-      - 'targetedAll'
-      - 'targetedProjects'
-      - 'targetedAffected'
+      - 'runManyListedTargetsAndAllProjects'
+      - 'runManyListedTargetsAndListedProjects'
+      - 'runManyListedTargetsAndAffectedProjects'
       - 'showAffectedList'
 
   affectedToIgnore:
