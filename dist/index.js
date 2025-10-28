@@ -25,6 +25,7 @@ import require$$6 from 'string_decoder';
 import require$$0$7 from 'diagnostics_channel';
 import require$$2$3 from 'child_process';
 import require$$6$1 from 'timers';
+import { exec as exec$1 } from 'node:child_process';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1752,13 +1753,13 @@ function requireTimers () {
 var main = {exports: {}};
 
 const require$3 = createRequire(import.meta.url);
-function __require$3() { return require$3("node:stream"); }
+function __require$2() { return require$3("node:stream"); }
 
 const require$2 = createRequire(import.meta.url);
-function __require$2() { return require$2("node:util"); }
+function __require$1() { return require$2("node:util"); }
 
 const require$1 = createRequire(import.meta.url);
-function __require$1() { return require$1("node:events"); }
+function __require() { return require$1("node:events"); }
 
 var sbmh;
 var hasRequiredSbmh;
@@ -1793,8 +1794,8 @@ function requireSbmh () {
 	 * Based heavily on the Streaming Boyer-Moore-Horspool C++ implementation
 	 * by Hongli Lai at: https://github.com/FooBarWidget/boyer-moore-horspool
 	 */
-	const EventEmitter = __require$1().EventEmitter;
-	const inherits = __require$2().inherits;
+	const EventEmitter = __require().EventEmitter;
+	const inherits = __require$1().inherits;
 
 	function SBMH (needle) {
 	  if (typeof needle === 'string') {
@@ -2003,8 +2004,8 @@ function requirePartStream () {
 	if (hasRequiredPartStream) return PartStream_1;
 	hasRequiredPartStream = 1;
 
-	const inherits = __require$2().inherits;
-	const ReadableStream = __require$3().Readable;
+	const inherits = __require$1().inherits;
+	const ReadableStream = __require$2().Readable;
 
 	function PartStream (opts) {
 	  ReadableStream.call(this, opts);
@@ -2048,8 +2049,8 @@ function requireHeaderParser () {
 	if (hasRequiredHeaderParser) return HeaderParser_1;
 	hasRequiredHeaderParser = 1;
 
-	const EventEmitter = __require$1().EventEmitter;
-	const inherits = __require$2().inherits;
+	const EventEmitter = __require().EventEmitter;
+	const inherits = __require$1().inherits;
 	const getLimit = requireGetLimit();
 
 	const StreamSearch = requireSbmh();
@@ -2156,8 +2157,8 @@ function requireDicer () {
 	if (hasRequiredDicer) return Dicer_1;
 	hasRequiredDicer = 1;
 
-	const WritableStream = __require$3().Writable;
-	const inherits = __require$2().inherits;
+	const WritableStream = __require$2().Writable;
+	const inherits = __require$1().inherits;
 
 	const StreamSearch = requireSbmh();
 
@@ -2733,8 +2734,8 @@ function requireMultipart () {
 	//  * support limits.fieldNameSize
 	//     -- this will require modifications to utils.parseParams
 
-	const { Readable } = __require$3();
-	const { inherits } = __require$2();
+	const { Readable } = __require$2();
+	const { inherits } = __require$1();
 
 	const Dicer = requireDicer();
 
@@ -3299,8 +3300,8 @@ function requireMain () {
 	if (hasRequiredMain) return main.exports;
 	hasRequiredMain = 1;
 
-	const WritableStream = __require$3().Writable;
-	const { inherits } = __require$2();
+	const WritableStream = __require$2().Writable;
+	const { inherits } = __require$1();
 	const Dicer = requireDicer();
 
 	const MultipartParser = requireMultipart();
@@ -25587,7 +25588,7 @@ function requirePathUtils () {
 
 var platform = {};
 
-var exec$1 = {};
+var exec = {};
 
 var toolrunner = {};
 
@@ -26721,28 +26722,28 @@ function requireToolrunner () {
 var hasRequiredExec;
 
 function requireExec () {
-	if (hasRequiredExec) return exec$1;
+	if (hasRequiredExec) return exec;
 	hasRequiredExec = 1;
-	var __createBinding = (exec$1 && exec$1.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+	var __createBinding = (exec && exec.__createBinding) || (Object.create ? (function(o, m, k, k2) {
 	    if (k2 === undefined) k2 = k;
 	    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 	}) : (function(o, m, k, k2) {
 	    if (k2 === undefined) k2 = k;
 	    o[k2] = m[k];
 	}));
-	var __setModuleDefault = (exec$1 && exec$1.__setModuleDefault) || (Object.create ? (function(o, v) {
+	var __setModuleDefault = (exec && exec.__setModuleDefault) || (Object.create ? (function(o, v) {
 	    Object.defineProperty(o, "default", { enumerable: true, value: v });
 	}) : function(o, v) {
 	    o["default"] = v;
 	});
-	var __importStar = (exec$1 && exec$1.__importStar) || function (mod) {
+	var __importStar = (exec && exec.__importStar) || function (mod) {
 	    if (mod && mod.__esModule) return mod;
 	    var result = {};
 	    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
 	    __setModuleDefault(result, mod);
 	    return result;
 	};
-	var __awaiter = (exec$1 && exec$1.__awaiter) || function (thisArg, _arguments, P, generator) {
+	var __awaiter = (exec && exec.__awaiter) || function (thisArg, _arguments, P, generator) {
 	    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
 	    return new (P || (P = Promise))(function (resolve, reject) {
 	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -26751,8 +26752,8 @@ function requireExec () {
 	        step((generator = generator.apply(thisArg, _arguments || [])).next());
 	    });
 	};
-	Object.defineProperty(exec$1, "__esModule", { value: true });
-	exec$1.getExecOutput = exec$1.exec = void 0;
+	Object.defineProperty(exec, "__esModule", { value: true });
+	exec.getExecOutput = exec.exec = void 0;
 	const string_decoder_1 = require$$6;
 	const tr = __importStar(requireToolrunner());
 	/**
@@ -26765,7 +26766,7 @@ function requireExec () {
 	 * @param     options            optional exec options.  See ExecOptions
 	 * @returns   Promise<number>    exit code
 	 */
-	function exec(commandLine, args, options) {
+	function exec$1(commandLine, args, options) {
 	    return __awaiter(this, void 0, void 0, function* () {
 	        const commandArgs = tr.argStringToArray(commandLine);
 	        if (commandArgs.length === 0) {
@@ -26778,7 +26779,7 @@ function requireExec () {
 	        return runner.exec();
 	    });
 	}
-	exec$1.exec = exec;
+	exec.exec = exec$1;
 	/**
 	 * Exec a command and get the output.
 	 * Output will be streamed to the live console.
@@ -26812,7 +26813,7 @@ function requireExec () {
 	            }
 	        };
 	        const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-	        const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+	        const exitCode = yield exec$1(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
 	        //flush any remaining characters
 	        stdout += stdoutDecoder.end();
 	        stderr += stderrDecoder.end();
@@ -26823,9 +26824,9 @@ function requireExec () {
 	        };
 	    });
 	}
-	exec$1.getExecOutput = getExecOutput;
+	exec.getExecOutput = getExecOutput;
 	
-	return exec$1;
+	return exec;
 }
 
 var hasRequiredPlatform;
@@ -31286,22 +31287,24 @@ function requireGithub () {
 
 var githubExports = requireGithub();
 
-//#region rolldown:runtime
-var __require = /* @__PURE__ */ createRequire(import.meta.url);
-
-//#endregion
 //#region src/utilities.ts
-const exec = __require("node:util").promisify(__require("node:child_process").exec);
-const execPromisified = async (command, execOverride) => {
-	execOverride = execOverride ?? exec;
-	try {
-		const { stdout, stderr } = await execOverride(command);
-		if (stderr) throw stderr;
-		return stdout.split(/\s+/).map((x) => x.trim()).filter((x) => x.length > 0);
-	} catch (error) {
-		coreExports.error(`Error executing command "${command}": ${error}`);
-		throw error;
-	}
+const spawnCommand = async (params) => {
+	const { command, override } = params;
+	const execToUse = override ?? exec$1;
+	return new Promise((resolve, reject) => {
+		execToUse(command, (error, stdout, stderr) => {
+			if (error) {
+				coreExports.error(`Command failed: ${command}`);
+				coreExports.error(`Failure: ${error}`);
+				coreExports.error(error);
+				reject(stderr);
+				return;
+			}
+			coreExports.info(`Command succeeded: ${command}`);
+			coreExports.info(`stdout`);
+			return resolve(stdout.split(/\s+/).map((x) => x.trim()).filter((x) => x.length > 0));
+		});
+	});
 };
 const validateInputs = (inputs) => {
 	coreExports.info("Validating inputs...");
@@ -31335,9 +31338,9 @@ const retrieveGitBoundaries = async (params) => {
 		head = inputs.headBoundaryOverride || pushPayload.after;
 	} else {
 		if (inputs.baseBoundaryOverride) base = inputs.baseBoundaryOverride;
-		else base = (await execPromisified("git rev-parse HEAD~1"))[0];
+		else base = (await spawnCommand({ command: "git rev-parse HEAD~1" }))[0];
 		if (inputs.headBoundaryOverride) head = inputs.headBoundaryOverride;
-		else head = (await execPromisified("git rev-parse HEAD"))[0];
+		else head = (await spawnCommand({ command: "git rev-parse HEAD" }))[0];
 	}
 	return {
 		base,
@@ -31347,7 +31350,7 @@ const retrieveGitBoundaries = async (params) => {
 
 //#endregion
 //#region src/nx.ts
-const runTargetedNxAll = async (inputs, args) => {
+const runManyListedTargetsAndAllProjects = async (inputs, args) => {
 	coreExports.startGroup("Running NX All");
 	const promises = [];
 	coreExports.info("Running nx targets...");
@@ -31355,12 +31358,12 @@ const runTargetedNxAll = async (inputs, args) => {
 		coreExports.info(`Target: ${target}`);
 		const cmd = `npx nx run-many --target=${target} ${args.join(" ")}`;
 		coreExports.info(`running command: ${cmd}`);
-		promises.push(execPromisified(cmd));
+		promises.push(spawnCommand({ command: cmd }));
 	}
 	await Promise.all(promises);
 	coreExports.endGroup();
 };
-const runTargetedNxProjects = async (inputs, args) => {
+const runManyListedTargetsAndListedProjects = async (inputs, args) => {
 	coreExports.startGroup("Running NX Projects");
 	const promises = [];
 	coreExports.info("Running nx targets...");
@@ -31368,12 +31371,12 @@ const runTargetedNxProjects = async (inputs, args) => {
 		coreExports.info(`Target: ${target}`);
 		const cmd = `npx nx run-many --target=${target} --projects=${inputs.projects.join(",")} ${args.join(" ")}`;
 		coreExports.info(`running command: ${cmd}`);
-		promises.push(execPromisified(cmd));
+		promises.push(spawnCommand({ command: cmd }));
 	}
 	await Promise.all(promises);
 	coreExports.endGroup();
 };
-const runTargetedNxAffected = async (inputs, args) => {
+const runManyListedTargetsAndAffectedProjects = async (inputs, args) => {
 	coreExports.startGroup("Running NX Affected");
 	coreExports.info("Retrieving git boundaries...");
 	const { base, head } = await retrieveGitBoundaries({
@@ -31389,7 +31392,7 @@ const runTargetedNxAffected = async (inputs, args) => {
 		coreExports.info(`Target: ${target}`);
 		const cmd = `npx nx affected --target=${target} --base=${base} --head=${head} ${args.join(" ")}`;
 		coreExports.info(`running command: ${cmd}`);
-		promises.push(execPromisified(cmd));
+		promises.push(spawnCommand({ command: cmd }));
 	}
 	await Promise.all(promises);
 	coreExports.endGroup();
@@ -31410,7 +31413,7 @@ const runShowNxAffectedList = async (inputs, args) => {
 	}
 	const cmd = `npx nx show projects --affected --base=${base} --head=${head} ${args.join(" ")}`;
 	coreExports.info(`running command: ${cmd}`);
-	const affected = (await execPromisified(cmd)).filter((project) => !inputs.affectedToIgnore.includes(project));
+	const affected = (await spawnCommand({ command: cmd })).filter((project) => !inputs.affectedToIgnore.includes(project));
 	coreExports.info(`Affected Project List: ${affected}`);
 	coreExports.setOutput("affected", affected);
 	coreExports.setOutput("hasAffected", affected.length > 0);
@@ -31432,9 +31435,9 @@ const runNx = async (inputs) => {
 	}
 	if (inputs.parallel) args.push(`--parallel=${inputs.parallel.toString()}`);
 	switch (inputs.command) {
-		case "runManyListedTargetsAndAllProjects": return runTargetedNxAll(inputs, args);
-		case "runManyListedTargetsAndListedProjects": return runTargetedNxProjects(inputs, args);
-		case "runManyListedTargetsAndAffectedProjects": return runTargetedNxAffected(inputs, args);
+		case "runManyListedTargetsAndAllProjects": return runManyListedTargetsAndAllProjects(inputs, args);
+		case "runManyListedTargetsAndListedProjects": return runManyListedTargetsAndListedProjects(inputs, args);
+		case "runManyListedTargetsAndAffectedProjects": return runManyListedTargetsAndAffectedProjects(inputs, args);
 		case "showAffectedList": return runShowNxAffectedList(inputs, args);
 		default: throw new Error(`Invalid command: ${inputs.command}`);
 	}
