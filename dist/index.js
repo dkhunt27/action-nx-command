@@ -14,7 +14,7 @@ import require$$7 from 'buffer';
 import require$$8 from 'querystring';
 import require$$14 from 'stream/web';
 import require$$0$7 from 'node:stream';
-import require$$1$2, { promisify } from 'node:util';
+import require$$1$2 from 'node:util';
 import require$$0$6 from 'node:events';
 import require$$0$8 from 'worker_threads';
 import require$$2$2 from 'perf_hooks';
@@ -27,7 +27,7 @@ import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
 import require$$2$3 from 'child_process';
 import require$$6$1 from 'timers';
-import { exec as exec$1 } from 'node:child_process';
+import { createRequire } from 'node:module';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -25581,7 +25581,7 @@ function requirePathUtils () {
 
 var platform = {};
 
-var exec = {};
+var exec$1 = {};
 
 var toolrunner = {};
 
@@ -26715,28 +26715,28 @@ function requireToolrunner () {
 var hasRequiredExec;
 
 function requireExec () {
-	if (hasRequiredExec) return exec;
+	if (hasRequiredExec) return exec$1;
 	hasRequiredExec = 1;
-	var __createBinding = (exec && exec.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+	var __createBinding = (exec$1 && exec$1.__createBinding) || (Object.create ? (function(o, m, k, k2) {
 	    if (k2 === undefined) k2 = k;
 	    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 	}) : (function(o, m, k, k2) {
 	    if (k2 === undefined) k2 = k;
 	    o[k2] = m[k];
 	}));
-	var __setModuleDefault = (exec && exec.__setModuleDefault) || (Object.create ? (function(o, v) {
+	var __setModuleDefault = (exec$1 && exec$1.__setModuleDefault) || (Object.create ? (function(o, v) {
 	    Object.defineProperty(o, "default", { enumerable: true, value: v });
 	}) : function(o, v) {
 	    o["default"] = v;
 	});
-	var __importStar = (exec && exec.__importStar) || function (mod) {
+	var __importStar = (exec$1 && exec$1.__importStar) || function (mod) {
 	    if (mod && mod.__esModule) return mod;
 	    var result = {};
 	    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
 	    __setModuleDefault(result, mod);
 	    return result;
 	};
-	var __awaiter = (exec && exec.__awaiter) || function (thisArg, _arguments, P, generator) {
+	var __awaiter = (exec$1 && exec$1.__awaiter) || function (thisArg, _arguments, P, generator) {
 	    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
 	    return new (P || (P = Promise))(function (resolve, reject) {
 	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -26745,8 +26745,8 @@ function requireExec () {
 	        step((generator = generator.apply(thisArg, _arguments || [])).next());
 	    });
 	};
-	Object.defineProperty(exec, "__esModule", { value: true });
-	exec.getExecOutput = exec.exec = void 0;
+	Object.defineProperty(exec$1, "__esModule", { value: true });
+	exec$1.getExecOutput = exec$1.exec = void 0;
 	const string_decoder_1 = require$$6;
 	const tr = __importStar(requireToolrunner());
 	/**
@@ -26759,7 +26759,7 @@ function requireExec () {
 	 * @param     options            optional exec options.  See ExecOptions
 	 * @returns   Promise<number>    exit code
 	 */
-	function exec$1(commandLine, args, options) {
+	function exec(commandLine, args, options) {
 	    return __awaiter(this, void 0, void 0, function* () {
 	        const commandArgs = tr.argStringToArray(commandLine);
 	        if (commandArgs.length === 0) {
@@ -26772,7 +26772,7 @@ function requireExec () {
 	        return runner.exec();
 	    });
 	}
-	exec.exec = exec$1;
+	exec$1.exec = exec;
 	/**
 	 * Exec a command and get the output.
 	 * Output will be streamed to the live console.
@@ -26806,7 +26806,7 @@ function requireExec () {
 	            }
 	        };
 	        const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-	        const exitCode = yield exec$1(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+	        const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
 	        //flush any remaining characters
 	        stdout += stdoutDecoder.end();
 	        stderr += stderrDecoder.end();
@@ -26817,9 +26817,9 @@ function requireExec () {
 	        };
 	    });
 	}
-	exec.getExecOutput = getExecOutput;
+	exec$1.getExecOutput = getExecOutput;
 	
-	return exec;
+	return exec$1;
 }
 
 var hasRequiredPlatform;
@@ -27284,14 +27284,16 @@ const parseArgs = (raw) => {
     return raw.split(' ').filter((arg) => arg.length > 0);
 };
 const parseInputs = () => {
+    const affectedToIgnore = coreExports.getInput('affectedToIgnore', { required: true })
+        .split(',')
+        .filter((target) => target.length > 0);
     const targets = coreExports.getInput('targets', { required: true })
         .split(',')
         .filter((target) => target.length > 0);
     const projects = coreExports.getInput('projects', { required: false })
         .split(',')
         .filter((project) => project.length > 0);
-    const all = coreExports.getInput('all') === 'true';
-    const affected = coreExports.getInput('affected') === 'true';
+    const command = coreExports.getInput('command', { required: true });
     const parallelNumber = Number(coreExports.getInput('parallel'));
     const parallel = Number.isNaN(parallelNumber) ? 3 : parallelNumber;
     const args = parseArgs(coreExports.getInput('args'));
@@ -27302,9 +27304,9 @@ const parseInputs = () => {
     // this is an internal flag used to skip running the actual nx command for testing purposes
     const isWorkflowsCiPipeline = coreExports.getInput('isWorkflowsCiPipeline') === 'true';
     return {
-        affected,
-        all,
+        affectedToIgnore,
         args,
+        command,
         baseBoundaryOverride,
         headBoundaryOverride,
         isWorkflowsCiPipeline,
@@ -27315,8 +27317,6 @@ const parseInputs = () => {
         workingDirectory
     };
 };
-
-var execExports = requireExec();
 
 var github = {};
 
@@ -31280,127 +31280,158 @@ function requireGithub () {
 
 var githubExports = requireGithub();
 
-const execPromise = promisify(exec$1);
-const execHandler = async (command) => {
-    const { stdout, stderr } = await execPromise(command);
-    if (stderr) {
-        throw stderr;
-    }
-    return stdout;
+//#region rolldown:runtime
+var __require = /* @__PURE__ */ createRequire(import.meta.url);
+
+//#endregion
+//#region src/utilities.ts
+const exec = __require("node:util").promisify(__require("node:child_process").exec);
+const execPromisified = async (command, execOverride) => {
+	execOverride = execOverride ?? exec;
+	try {
+		const { stdout, stderr } = await execOverride(command);
+		if (stderr) throw stderr;
+		return stdout.split(/\s+/).map((x) => x.trim()).filter((x) => x.length > 0);
+	} catch (error) {
+		coreExports.error(`Error executing command "${command}": ${error}`);
+		throw error;
+	}
 };
-const gitRevParse = async (ref) => {
-    const result = await execHandler(`git rev-parse ${ref}`);
-    return result.replace(/(\r\n|\n|\r)/gm, '');
+const validateInputs = (inputs) => {
+	coreExports.info("Validating inputs...");
+	switch (inputs.command) {
+		case "targetedProjects": if (inputs.projects.length === 0) throw new Error(`Projects cannot be empty when command is ${inputs.command}.`);
+		case "targetedAll":
+		case "targetedAffected":
+			if (inputs.targets.length === 0) throw new Error(`Targets cannot be empty when command is ${inputs.command}.`);
+			break;
+		case "showAffectedList":
+			if (inputs.projects.length > 0) throw new Error(`Projects must be empty when command is ${inputs.command}.`);
+			break;
+		default: throw new Error(`Invalid command: ${inputs.command}`);
+	}
+	coreExports.info("Inputs are valid.");
 };
 
+//#endregion
+//#region src/git-utilities.ts
 const retrieveGitBoundaries = async (params) => {
-    const { inputs, githubContextEventName, githubContextPayload, gitRevParse } = params;
-    let base = '';
-    let head = '';
-    if (githubContextEventName === 'pull_request') {
-        const prPayload = githubContextPayload.pull_request;
-        base = prPayload.base.sha;
-        head = prPayload.head.sha;
-    }
-    else if (githubContextEventName === 'push') {
-        const pushPayload = githubContextPayload;
-        base = inputs.baseBoundaryOverride || pushPayload.before;
-        head = inputs.headBoundaryOverride || pushPayload.after;
-    }
-    else {
-        if (inputs.baseBoundaryOverride) {
-            base = inputs.baseBoundaryOverride;
-        }
-        else {
-            base = await gitRevParse('HEAD~1');
-        }
-        if (inputs.headBoundaryOverride) {
-            head = inputs.headBoundaryOverride;
-        }
-        else {
-            head = await gitRevParse('HEAD');
-        }
-    }
-    return { base, head };
+	const { inputs, githubContextEventName, githubContextPayload } = params;
+	let base = "";
+	let head = "";
+	if (githubContextEventName === "pull_request") {
+		const prPayload = githubContextPayload.pull_request;
+		base = prPayload.base.sha;
+		head = prPayload.head.sha;
+	} else if (githubContextEventName === "push") {
+		const pushPayload = githubContextPayload;
+		base = inputs.baseBoundaryOverride || pushPayload.before;
+		head = inputs.headBoundaryOverride || pushPayload.after;
+	} else {
+		if (inputs.baseBoundaryOverride) base = inputs.baseBoundaryOverride;
+		else base = (await execPromisified("git rev-parse HEAD~1"))[0];
+		if (inputs.headBoundaryOverride) head = inputs.headBoundaryOverride;
+		else head = (await execPromisified("git rev-parse HEAD"))[0];
+	}
+	return {
+		base,
+		head
+	};
 };
-const nx = async (args) => {
-    // using exec.exec instead of execHandler to stream output to console
-    await execExports.exec(`npx nx ${args.join(' ')}`);
+
+//#endregion
+//#region src/nx.ts
+const runTargetedNxAll = async (inputs, args) => {
+	coreExports.startGroup("Running NX All");
+	const promises = [];
+	coreExports.info("Running nx targets...");
+	for (const target of inputs.targets) {
+		coreExports.info(`Target: ${target}`);
+		const cmd = `npx nx run-many --target=${target} ${args.join(" ")}`;
+		coreExports.info(`running command: ${cmd}`);
+		promises.push(execPromisified(cmd));
+	}
+	await Promise.all(promises);
+	coreExports.endGroup();
 };
-const runNxAll = async (inputs, args) => {
-    coreExports.startGroup('Running NX All');
-    const promises = [];
-    coreExports.info('Running nx targets...');
-    for (const target of inputs.targets) {
-        coreExports.info(`Target: ${target}`);
-        promises.push(nx(['run-many', `--target=${target}`, ...args]));
-    }
-    await Promise.all(promises);
-    coreExports.endGroup();
+const runTargetedNxProjects = async (inputs, args) => {
+	coreExports.startGroup("Running NX Projects");
+	const promises = [];
+	coreExports.info("Running nx targets...");
+	for (const target of inputs.targets) {
+		coreExports.info(`Target: ${target}`);
+		const cmd = `npx nx run-many --target=${target} --projects=${inputs.projects.join(",")} ${args.join(" ")}`;
+		coreExports.info(`running command: ${cmd}`);
+		promises.push(execPromisified(cmd));
+	}
+	await Promise.all(promises);
+	coreExports.endGroup();
 };
-const runNxProjects = async (inputs, args) => {
-    coreExports.startGroup('Running NX Projects');
-    const promises = [];
-    coreExports.info('Running nx targets...');
-    for (const target of inputs.targets) {
-        coreExports.info(`Target: ${target}`);
-        promises.push(nx([
-            'run-many',
-            `--target=${target}`,
-            `--projects=${inputs.projects.join(',')}`,
-            ...args
-        ]));
-    }
-    await Promise.all(promises);
-    coreExports.endGroup();
+const runTargetedNxAffected = async (inputs, args) => {
+	coreExports.startGroup("Running NX Affected");
+	coreExports.info("Retrieving git boundaries...");
+	const { base, head } = await retrieveGitBoundaries({
+		inputs,
+		githubContextEventName: githubExports.context.eventName,
+		githubContextPayload: githubExports.context.payload
+	});
+	coreExports.info(`Base boundary: ${base}`);
+	coreExports.info(`Head boundary: ${head}`);
+	const promises = [];
+	coreExports.info("Running nx targets...");
+	for (const target of inputs.targets) {
+		coreExports.info(`Target: ${target}`);
+		const cmd = `npx nx affected --target=${target} --base=${base} --head=${head} ${args.join(" ")}`;
+		coreExports.info(`running command: ${cmd}`);
+		promises.push(execPromisified(cmd));
+	}
+	await Promise.all(promises);
+	coreExports.endGroup();
 };
-const runNxAffected = async (inputs, args) => {
-    coreExports.startGroup('Running NX Affected');
-    coreExports.info('Retrieving git boundaries...');
-    const { base, head } = await retrieveGitBoundaries({
-        inputs,
-        githubContextEventName: githubExports.context.eventName,
-        githubContextPayload: githubExports.context.payload,
-        gitRevParse: gitRevParse
-    });
-    coreExports.info(`Base boundary: ${base}`);
-    coreExports.info(`Head boundary: ${head}`);
-    const promises = [];
-    coreExports.info('Running nx targets...');
-    for (const target of inputs.targets) {
-        coreExports.info(`Target: ${target}`);
-        promises.push(nx([
-            'affected',
-            `--target=${target}`,
-            `--base=${base}`,
-            `--head=${head}`,
-            ...args
-        ]));
-    }
-    await Promise.all(promises);
-    coreExports.endGroup();
+const runShowNxAffectedList = async (inputs, args) => {
+	coreExports.startGroup("Running NX Show Affected List");
+	coreExports.info("Retrieving git boundaries...");
+	const { base, head } = await retrieveGitBoundaries({
+		inputs,
+		githubContextEventName: githubExports.context.eventName,
+		githubContextPayload: githubExports.context.payload
+	});
+	coreExports.info(`Base boundary: ${base}aaa`);
+	coreExports.info(`Head boundary: ${head}bbb`);
+	if (inputs.targets.length > 0) {
+		coreExports.info(`Using targets: ${inputs.targets.join(",")}`);
+		args.push(`--withTarget=${inputs.targets.join(",")}`);
+	}
+	const cmd = `npx nx show projects --affected --base=${base} --head=${head} ${args.join(" ")}`;
+	coreExports.info(`running command: ${cmd}`);
+	const affected = (await execPromisified(cmd)).filter((project) => !inputs.affectedToIgnore.includes(project));
+	coreExports.info(`Affected Project List: ${affected}`);
+	coreExports.setOutput("affected", affected);
+	coreExports.setOutput("hasAffected", affected.length > 0);
+	coreExports.endGroup();
+	return affected;
 };
+
+//#endregion
+//#region src/index.ts
 const runNx = async (inputs) => {
-    const args = inputs.args;
-    coreExports.info(`args: ${args.join()}`);
-    if (inputs.setNxBranchToPrNumber) {
-        if (githubExports.context.eventName === 'pull_request') {
-            const prPayload = githubExports.context.payload.pull_request;
-            process.env.NX_BRANCH = prPayload.number.toString();
-        }
-    }
-    if (inputs.parallel) {
-        args.push(`--parallel=${inputs.parallel.toString()}`);
-    }
-    if (inputs.all === true || inputs.affected === false) {
-        return runNxAll(inputs, args);
-    }
-    else if (inputs.projects.length > 0) {
-        return runNxProjects(inputs, args);
-    }
-    else {
-        return runNxAffected(inputs, args);
-    }
+	const args = inputs.args;
+	validateInputs(inputs);
+	coreExports.info(`args: ${args.join()}`);
+	if (inputs.setNxBranchToPrNumber) {
+		if (githubExports.context.eventName === "pull_request") {
+			const prPayload = githubExports.context.payload.pull_request;
+			process.env.NX_BRANCH = prPayload.number.toString();
+		}
+	}
+	if (inputs.parallel) args.push(`--parallel=${inputs.parallel.toString()}`);
+	switch (inputs.command) {
+		case "targetedAll": return runTargetedNxAll(inputs, args);
+		case "targetedProjects": return runTargetedNxProjects(inputs, args);
+		case "targetedAffected": return runTargetedNxAffected(inputs, args);
+		case "showAffectedList": return runShowNxAffectedList(inputs, args);
+		default: throw new Error(`Invalid command: ${inputs.command}`);
+	}
 };
 
 const run = async () => {

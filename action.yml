@@ -8,24 +8,33 @@ branding:
 
 # Define your inputs here.
 inputs:
-  affected: # Mutually exclusive with `all`
+  command:
+    description: 'NX command to run.,'
+    required: true
+    options:
+      - 'targetedAll'
+      - 'targetedProjects'
+      - 'targetedAffected'
+      - 'showAffectedList'
+
+  affectedToIgnore:
     description:
-      "Use the Nx' affected subcommand to only process affected projects"
+      'Command: showAffectedList -- Projects to ignore (comma-separated)'
     required: false
-    default: 'true'
-  all: # Mutually exclusive with `affected`
-    description: 'Run the targets on all projects'
-    required: false
-    default: 'false'
+    default: ''
   args:
     description: 'Optional arguments to append to the Nx command'
     required: false
     default: ''
   baseBoundaryOverride:
-    description: 'Parameter to use for overriding nx base commit'
+    description:
+      'Command: targetedAffected, showAffectedList -- Parameter to use for
+      overriding nx base commit'
     required: false
   headBoundaryOverride:
-    description: 'Parameter to use for overriding nx head commit'
+    description:
+      'Command: targetedAffected, showAffectedList -- Parameter to use for
+      overriding nx head commit'
     required: false
   isWorkflowsCiPipeline:
     description:
@@ -37,14 +46,18 @@ inputs:
     required: false
     default: '3'
   projects:
-    description: 'Comma-separated list of projects to use'
+    description:
+      'Command: targetedProjects -- Comma-separated list of projects to pass to
+      nx command'
     required: false
   setNxBranchToPrNumber:
     description:
       'Set the NX_BRANCH environment variable to the pull request number'
     required: false
   targets:
-    description: 'Comma-separated list of targets to execute'
+    description:
+      'Command: targeted* (required), showAffectedList(optional) --
+      Comma-separated list of targets to execute'
     required: true
   workingDirectory:
     description: 'Path to the Nx workspace, needed if not the repository root'

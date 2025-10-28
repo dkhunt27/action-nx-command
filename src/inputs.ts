@@ -1,24 +1,16 @@
 import * as core from '@actions/core'
-
-export type Inputs = {
-  readonly affected: boolean
-  readonly all: boolean
-  readonly args: readonly string[]
-  readonly baseBoundaryOverride: string
-  readonly headBoundaryOverride: string
-  readonly isWorkflowsCiPipeline: boolean
-  readonly parallel: number
-  readonly projects: readonly string[]
-  readonly setNxBranchToPrNumber: boolean
-  readonly targets: readonly string[]
-  readonly workingDirectory: string
-}
+import type { NxCommandInputs } from 'action-nx-command-wrapper'
 
 export const parseArgs = (raw: string): string[] => {
   return raw.split(' ').filter((arg) => arg.length > 0)
 }
 
-export const parseInputs = (): Inputs => {
+export const parseInputs = (): NxCommandInputs => {
+  const affectedToIgnore = core
+    .getInput('affectedToIgnore', { required: true })
+    .split(',')
+    .filter((target) => target.length > 0)
+
   const targets = core
     .getInput('targets', { required: true })
     .split(',')
@@ -29,9 +21,7 @@ export const parseInputs = (): Inputs => {
     .split(',')
     .filter((project) => project.length > 0)
 
-  const all = core.getInput('all') === 'true'
-
-  const affected = core.getInput('affected') === 'true'
+  const command = core.getInput('command', { required: true })
 
   const parallelNumber = Number(core.getInput('parallel'))
   const parallel = Number.isNaN(parallelNumber) ? 3 : parallelNumber
@@ -52,9 +42,9 @@ export const parseInputs = (): Inputs => {
     core.getInput('isWorkflowsCiPipeline') === 'true'
 
   return {
-    affected,
-    all,
+    affectedToIgnore,
     args,
+    command,
     baseBoundaryOverride,
     headBoundaryOverride,
     isWorkflowsCiPipeline,
@@ -63,5 +53,5 @@ export const parseInputs = (): Inputs => {
     setNxBranchToPrNumber,
     targets,
     workingDirectory
-  }
+  } as NxCommandInputs
 }

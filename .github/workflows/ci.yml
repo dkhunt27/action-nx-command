@@ -57,7 +57,7 @@ jobs:
         id: test-action
         uses: ./
         with:
+          command: targetedAffected
           targets: abc
-          args: '--foo=bar'
-          projects: app1
+          args: "--foo=bar"
           isWorkflowsCiPipeline: true
