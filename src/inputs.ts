@@ -7,7 +7,7 @@ export const parseArgs = (raw: string): string[] => {
 
 export const parseInputs = (): NxCommandInputs => {
   const affectedToIgnore = core
-    .getInput('affectedToIgnore', { required: true })
+    .getInput('affectedToIgnore', { required: false })
     .split(',')
     .filter((target) => target.length > 0)
 
