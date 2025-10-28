@@ -1,4 +1,4 @@
-import { parseArgs } from './inputs.ts'
+import { parseArgs } from '../src/inputs.ts'
 
 describe('parseArgs', () => {
   test('should parse as expected', () => {
