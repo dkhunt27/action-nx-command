@@ -11,7 +11,7 @@ inputs:
   command:
     description: 'NX command to run.,'
     required: true
-    values:
+    options:
       - 'targetedAll'
       - 'targetedProjects'
       - 'targetedAffected'
