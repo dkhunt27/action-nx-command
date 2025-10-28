@@ -31288,20 +31288,22 @@ function requireGithub () {
 var githubExports = requireGithub();
 
 //#region src/utilities.ts
-const spawnCommand = async (params) => {
+const executeCommand = async (params) => {
 	const { command, override } = params;
 	const execToUse = override ?? exec$1;
 	return new Promise((resolve, reject) => {
 		execToUse(command, (error, stdout, stderr) => {
+			coreExports.info(`stdout::`);
+			coreExports.info(stdout);
+			coreExports.info(`stderr::`);
+			coreExports.info(stderr);
 			if (error) {
-				coreExports.error(`Command failed: ${command}`);
-				coreExports.error(`Failure: ${error}`);
+				coreExports.info(`Command failed`);
 				coreExports.error(error);
 				reject(stderr);
 				return;
 			}
-			coreExports.info(`Command succeeded: ${command}`);
-			coreExports.info(`stdout`);
+			coreExports.info(`Command succeeded`);
 			return resolve(stdout.split(/\s+/).map((x) => x.trim()).filter((x) => x.length > 0));
 		});
 	});
@@ -31338,9 +31340,9 @@ const retrieveGitBoundaries = async (params) => {
 		head = inputs.headBoundaryOverride || pushPayload.after;
 	} else {
 		if (inputs.baseBoundaryOverride) base = inputs.baseBoundaryOverride;
-		else base = (await spawnCommand({ command: "git rev-parse HEAD~1" }))[0];
+		else base = (await executeCommand({ command: "git rev-parse HEAD~1" }))[0];
 		if (inputs.headBoundaryOverride) head = inputs.headBoundaryOverride;
-		else head = (await spawnCommand({ command: "git rev-parse HEAD" }))[0];
+		else head = (await executeCommand({ command: "git rev-parse HEAD" }))[0];
 	}
 	return {
 		base,
@@ -31358,7 +31360,7 @@ const runManyListedTargetsAndAllProjects = async (inputs, args) => {
 		coreExports.info(`Target: ${target}`);
 		const cmd = `npx nx run-many --target=${target} ${args.join(" ")}`;
 		coreExports.info(`running command: ${cmd}`);
-		promises.push(spawnCommand({ command: cmd }));
+		promises.push(executeCommand({ command: cmd }));
 	}
 	await Promise.all(promises);
 	coreExports.endGroup();
@@ -31371,7 +31373,7 @@ const runManyListedTargetsAndListedProjects = async (inputs, args) => {
 		coreExports.info(`Target: ${target}`);
 		const cmd = `npx nx run-many --target=${target} --projects=${inputs.projects.join(",")} ${args.join(" ")}`;
 		coreExports.info(`running command: ${cmd}`);
-		promises.push(spawnCommand({ command: cmd }));
+		promises.push(executeCommand({ command: cmd }));
 	}
 	await Promise.all(promises);
 	coreExports.endGroup();
@@ -31392,7 +31394,7 @@ const runManyListedTargetsAndAffectedProjects = async (inputs, args) => {
 		coreExports.info(`Target: ${target}`);
 		const cmd = `npx nx affected --target=${target} --base=${base} --head=${head} ${args.join(" ")}`;
 		coreExports.info(`running command: ${cmd}`);
-		promises.push(spawnCommand({ command: cmd }));
+		promises.push(executeCommand({ command: cmd }));
 	}
 	await Promise.all(promises);
 	coreExports.endGroup();
@@ -31413,7 +31415,7 @@ const runShowNxAffectedList = async (inputs, args) => {
 	}
 	const cmd = `npx nx show projects --affected --base=${base} --head=${head} ${args.join(" ")}`;
 	coreExports.info(`running command: ${cmd}`);
-	const affected = (await spawnCommand({ command: cmd })).filter((project) => !inputs.affectedToIgnore.includes(project));
+	const affected = (await executeCommand({ command: cmd })).filter((project) => !inputs.affectedToIgnore.includes(project));
 	coreExports.info(`Affected Project List: ${affected}`);
 	coreExports.setOutput("affected", affected);
 	coreExports.setOutput("hasAffected", affected.length > 0);
