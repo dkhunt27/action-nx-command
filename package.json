@@ -45,7 +45,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@octokit/webhooks-types": "^7.6.1",
-    "action-nx-command-wrapper": "^0.0.13"
+    "action-nx-command-wrapper": "^0.0.14"
   },
   "devDependencies": {
     "@eslint/compat": "^1.4.0",
