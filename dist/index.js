@@ -27294,7 +27294,7 @@ const parseInputs = () => {
     const affectedToIgnore = coreExports.getInput('affectedToIgnore', { required: false })
         .split(',')
         .filter((target) => target.length > 0);
-    const targets = coreExports.getInput('targets', { required: true })
+    const targets = coreExports.getInput('targets', { required: false })
         .split(',')
         .filter((target) => target.length > 0);
     const projects = coreExports.getInput('projects', { required: false })

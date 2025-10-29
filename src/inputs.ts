@@ -12,7 +12,7 @@ export const parseInputs = (): NxCommandInputs => {
     .filter((target: string[]) => target.length > 0)
 
   const targets = core
-    .getInput('targets', { required: true })
+    .getInput('targets', { required: false })
     .split(',')
     .filter((target: string[]) => target.length > 0)
 
