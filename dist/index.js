@@ -31358,7 +31358,7 @@ const runManyListedTargetsAndAllProjects = async (inputs, args) => {
 	coreExports.info("Running nx targets...");
 	for (const target of inputs.targets) {
 		coreExports.info(`Target: ${target}`);
-		const cmd = `npx nx run-many --target=${target} ${args.join(" ")}`;
+		const cmd = `npx --yes nx run-many --target=${target} ${args.join(" ")}`;
 		coreExports.info(`running command: ${cmd}`);
 		promises.push(executeCommand({ command: cmd }));
 	}
@@ -31371,7 +31371,7 @@ const runManyListedTargetsAndListedProjects = async (inputs, args) => {
 	coreExports.info("Running nx targets...");
 	for (const target of inputs.targets) {
 		coreExports.info(`Target: ${target}`);
-		const cmd = `npx nx run-many --target=${target} --projects=${inputs.projects.join(",")} ${args.join(" ")}`;
+		const cmd = `npx --yes nx run-many --target=${target} --projects=${inputs.projects.join(",")} ${args.join(" ")}`;
 		coreExports.info(`running command: ${cmd}`);
 		promises.push(executeCommand({ command: cmd }));
 	}
@@ -31392,7 +31392,7 @@ const runManyListedTargetsAndAffectedProjects = async (inputs, args) => {
 	coreExports.info("Running nx targets...");
 	for (const target of inputs.targets) {
 		coreExports.info(`Target: ${target}`);
-		const cmd = `npx nx affected --target=${target} --base=${base} --head=${head} ${args.join(" ")}`;
+		const cmd = `npx --yes nx affected --target=${target} --base=${base} --head=${head} ${args.join(" ")}`;
 		coreExports.info(`running command: ${cmd}`);
 		promises.push(executeCommand({ command: cmd }));
 	}
@@ -31413,7 +31413,7 @@ const runShowNxAffectedList = async (inputs, args) => {
 		coreExports.info(`Using targets: ${inputs.targets.join(",")}`);
 		args.push(`--withTarget=${inputs.targets.join(",")}`);
 	}
-	const cmd = `npx nx show projects --affected --base=${base} --head=${head} ${args.join(" ")}`;
+	const cmd = `npx --yes nx show projects --affected --base=${base} --head=${head} ${args.join(" ")}`;
 	coreExports.info(`running command: ${cmd}`);
 	const affected = (await executeCommand({ command: cmd })).filter((project) => !inputs.affectedToIgnore.includes(project));
 	coreExports.info(`Affected Project List: ${affected}`);
