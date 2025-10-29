@@ -27301,8 +27301,6 @@ const parseInputs = () => {
         .split(',')
         .filter((project) => project.length > 0);
     const command = coreExports.getInput('command', { required: true });
-    const parallelNumber = Number(coreExports.getInput('parallel'));
-    const parallel = Number.isNaN(parallelNumber) ? 3 : parallelNumber;
     const args = parseArgs(coreExports.getInput('args'));
     const setNxBranchToPrNumber = coreExports.getInput('setNxBranchToPrNumber') === 'true';
     const workingDirectory = coreExports.getInput('workingDirectory');
@@ -27317,7 +27315,6 @@ const parseInputs = () => {
         baseBoundaryOverride,
         headBoundaryOverride,
         isWorkflowsCiPipeline,
-        parallel,
         projects,
         setNxBranchToPrNumber,
         targets,
@@ -31435,7 +31432,6 @@ const runNx = async (inputs) => {
 			process.env.NX_BRANCH = prPayload.number.toString();
 		}
 	}
-	if (inputs.parallel) args.push(`--parallel=${inputs.parallel.toString()}`);
 	switch (inputs.command) {
 		case "runManyListedTargetsAndAllProjects": return runManyListedTargetsAndAllProjects(inputs, args);
 		case "runManyListedTargetsAndListedProjects": return runManyListedTargetsAndListedProjects(inputs, args);

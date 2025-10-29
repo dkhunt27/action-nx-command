@@ -41,10 +41,6 @@ inputs:
       'DO NOT USE: Flag to indicate if `.github/workflows/ci.yml` is being
       executed '
     required: false
-  parallel:
-    description: 'Number of tasks to execute in parallel (can be expensive)'
-    required: false
-    default: '3'
   projects:
     description:
       'Command: targetedProjects -- Comma-separated list of projects to pass to

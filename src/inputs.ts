@@ -9,22 +9,19 @@ export const parseInputs = (): NxCommandInputs => {
   const affectedToIgnore = core
     .getInput('affectedToIgnore', { required: false })
     .split(',')
-    .filter((target) => target.length > 0)
+    .filter((target: string[]) => target.length > 0)
 
   const targets = core
     .getInput('targets', { required: true })
     .split(',')
-    .filter((target) => target.length > 0)
+    .filter((target: string[]) => target.length > 0)
 
   const projects = core
     .getInput('projects', { required: false })
     .split(',')
-    .filter((project) => project.length > 0)
+    .filter((project: string[]) => project.length > 0)
 
   const command = core.getInput('command', { required: true })
-
-  const parallelNumber = Number(core.getInput('parallel'))
-  const parallel = Number.isNaN(parallelNumber) ? 3 : parallelNumber
 
   const args = parseArgs(core.getInput('args'))
 
@@ -48,7 +45,6 @@ export const parseInputs = (): NxCommandInputs => {
     baseBoundaryOverride,
     headBoundaryOverride,
     isWorkflowsCiPipeline,
-    parallel,
     projects,
     setNxBranchToPrNumber,
     targets,

@@ -47,7 +47,6 @@ This GitHub action can take several inputs to configure its behaviors:
 | args                  | String               |         | `--key="value"`    | Optional args to append to the Nx commands                                         |
 | baseBoundaryOverride  | String               |         |                    | Parameter to use for overriding nx base commit                                     |
 | headBoundaryOverride  | String               |         |                    | Parameter to use for overriding nx head commit                                     |
-| parallel              | Number               | `3`     | `3`                | Number of tasks to execute in parallel (can be expensive)                          |
 | projects              | Comma-separated list |         | `frontend,backend` | List of projects to use (more below)                                               |
 | setNxBranchToPrNumber | Boolean              | `false` | `true`             | Set the NX_BRANCH environment variable to the pull request number                  |
 | targets               | Comma-separated list |         | `lint,test,build`  | List of targets to execute                                                         |
@@ -111,24 +110,10 @@ This will run the `build` target on the `frontend` and `backend` projects only.
     projects: frontend,backend
 ```
 
-### Run one target on all the projects sequentially
-
-This will run the `lint` target on all the projects of the workspace
-sequentially.
-
-```yaml
----
-- uses: dkhunt27/nx-command@v1
-  with:
-    targets: lint
-    all: 'true'
-    parallel: 1
-```
-
 ### Send extra arguments to the nx command
 
 This will skip the nx cloud (assuming nx cloud enabled in nx.json) and enable
-extra logging
+extra logging and run 3 tasks in parallel
 
 > workflow.yml
 
@@ -137,7 +122,7 @@ extra logging
 - uses: dkhunt27/nx-command@v1
   with:
     targets: build
-    args: --skip-nx-cloud --verbose
+    args: --skip-nx-cloud --verbose --parallel=3
 ```
 
 ## Test your action locally
